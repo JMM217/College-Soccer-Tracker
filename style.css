@@ -1,0 +1,49 @@
+/* Reset & Base Layout */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #0f172a;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Header Banner */
+header {
+  padding: 0.75rem 1rem;
+  background-color: #1e293b;
+  border-bottom: 1px solid #334155;
+  text-align: center;
+  z-index: 1000;
+}
+
+header h1 {
+  font-size: 1.25rem;
+  color: #10b981;
+}
+
+header p {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+/* Map Container */
+main {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  background-color: #0f172a;
+}
