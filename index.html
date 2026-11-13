@@ -104,6 +104,18 @@
       <!-- Controls Group -->
       <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
         
+        <!-- State Filter Dropdown -->
+        <div class="relative">
+          <select 
+            id="state-filter" 
+            aria-label="Filter by state"
+            class="appearance-none pl-3.5 pr-8 py-1.5 bg-brand-50 border border-brand-200 rounded-xl text-xs font-semibold text-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
+          >
+            <option value="ALL">All States</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-brand-600 text-[10px] pointer-events-none"></i>
+        </div>
+
         <!-- Gender Segmented Buttons -->
         <div class="flex bg-brand-100 p-1 rounded-xl text-xs font-semibold">
           <button id="btn-gender-all" class="gender-btn active px-3 py-1.5 rounded-lg bg-white text-brand-800 shadow-sm">All</button>
@@ -356,10 +368,12 @@
 
     // State Variables
     let currentGender = 'ALL';
+    let currentState = 'ALL';
     let currentSearch = '';
 
     // DOM Elements
     const searchInput = document.getElementById('search-input');
+    const stateFilter = document.getElementById('state-filter');
     const totalProgramsCount = document.getElementById('total-programs-count');
     const totalConferencesCount = document.getElementById('total-conferences-count');
     const mensCountEl = document.getElementById('mens-count');
@@ -371,12 +385,18 @@
     // Initialize App
     window.onload = function() {
       updateMetrics();
+      populateStateDropdown();
       renderConferenceChips();
       renderDashboard();
 
       // Setup Event Listeners
       searchInput.addEventListener('input', (e) => {
         currentSearch = e.target.value.toLowerCase().trim();
+        renderDashboard();
+      });
+
+      stateFilter.addEventListener('change', (e) => {
+        currentState = e.target.value;
         renderDashboard();
       });
 
@@ -387,6 +407,17 @@
 
       resetFiltersBtn.addEventListener('click', resetFilters);
     };
+
+    // Populate State Filter Dropdown
+    function populateStateDropdown() {
+      const states = [...new Set(D1_SOCCER_PROGRAMS.map(p => p.state))].sort();
+      states.forEach(st => {
+        const option = document.createElement('option');
+        option.value = st;
+        option.textContent = `State: ${st}`;
+        stateFilter.appendChild(option);
+      });
+    }
 
     // Set Gender Filter
     function setGenderFilter(gender, btnElement) {
@@ -404,7 +435,9 @@
     function resetFilters() {
       currentSearch = '';
       currentGender = 'ALL';
+      currentState = 'ALL';
       searchInput.value = '';
+      stateFilter.value = 'ALL';
       setGenderFilter('ALL', document.getElementById('btn-gender-all'));
     }
 
@@ -445,6 +478,7 @@
       return D1_SOCCER_PROGRAMS.filter(program => {
         if (currentGender === 'MEN' && !program.mens) return false;
         if (currentGender === 'WOMEN' && !program.womens) return false;
+        if (currentState !== 'ALL' && program.state !== currentState) return false;
 
         if (currentSearch !== '') {
           const nameMatch = program.name.toLowerCase().includes(currentSearch);
@@ -469,7 +503,7 @@
           <div class="bg-white rounded-2xl p-12 text-center text-slate-400 border border-brand-100 shadow-sm">
             <i class="fa-solid fa-futbol text-4xl mb-3 text-brand-200"></i>
             <h3 class="text-lg font-bold text-slate-700 mb-1">No Programs Found</h3>
-            <p class="text-xs">Try adjusting your search query or gender filter.</p>
+            <p class="text-xs">Try adjusting your search query, state, or gender filter.</p>
           </div>
         `;
         return;
