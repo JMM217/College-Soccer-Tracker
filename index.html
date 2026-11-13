@@ -298,7 +298,6 @@
       { id: "rice", name: "Rice University", city: "Houston", state: "TX", conference: "AAC", mens: false, womens: true, stadium: "Holloway Field", capacity: 1500, surface: "Grass", mensStats: null, womensStats: { confTitles: 4, ncaaApps: 4, ncaaTitles: 0 } },
       { id: "unt", name: "University of North Texas", city: "Denton", state: "TX", conference: "AAC", mens: false, womens: true, stadium: "UNT Soccer & Track Complex", capacity: 1500, surface: "Grass", mensStats: null, womensStats: { confTitles: 15, ncaaApps: 8, ncaaTitles: 0 } },
       { id: "utsa", name: "UTSA", city: "San Antonio", state: "TX", conference: "AAC", mens: false, womens: true, stadium: "Park West Athletics Complex", capacity: 1000, surface: "Grass", mensStats: null, womensStats: { confTitles: 2, ncaaApps: 2, ncaaTitles: 0 } },
-      { id: "tulane", name: "Tulane University", city: "New Orleans", state: "LA", conference: "AAC", mens: false, womens: false, stadium: "None", capacity: 0, surface: "None", mensStats: null, womensStats: null },
 
       // PATRIOT LEAGUE
       { id: "navy", name: "United States Naval Academy", city: "Annapolis", state: "MD", conference: "Patriot League", mens: true, womens: true, stadium: "Glenn Warner Soccer Facility", capacity: 2500, surface: "Grass", mensStats: { confTitles: 2, ncaaApps: 12, ncaaTitles: 1 }, womensStats: { confTitles: 3, ncaaApps: 5, ncaaTitles: 0 } },
@@ -603,7 +602,8 @@
 
     // Populate State Filter Dropdown
     function populateStateDropdown() {
-      const states = [...new Set(D1_SOCCER_PROGRAMS.map(p => p.state))].sort();
+      const activePrograms = D1_SOCCER_PROGRAMS.filter(p => p.mens || p.womens);
+      const states = [...new Set(activePrograms.map(p => p.state))].sort();
       states.forEach(st => {
         const option = document.createElement('option');
         option.value = st;
@@ -634,19 +634,20 @@
       setGenderFilter('ALL', document.getElementById('btn-gender-all'));
     }
 
-    // Header Metrics
+    // Header Metrics (Counts only active soccer-sponsoring schools)
     function updateMetrics() {
+      const activePrograms = D1_SOCCER_PROGRAMS.filter(p => p.mens || p.womens);
       let mensTotal = 0;
       let womensTotal = 0;
       const confSet = new Set();
 
-      D1_SOCCER_PROGRAMS.forEach(p => {
+      activePrograms.forEach(p => {
         if (p.mens) mensTotal++;
         if (p.womens) womensTotal++;
         confSet.add(p.conference);
       });
 
-      totalProgramsCount.textContent = D1_SOCCER_PROGRAMS.length;
+      totalProgramsCount.textContent = activePrograms.length;
       totalConferencesCount.textContent = confSet.size;
       mensCountEl.textContent = mensTotal;
       womensCountEl.textContent = womensTotal;
@@ -654,7 +655,8 @@
 
     // Render Jump-to Chips
     function renderConferenceChips() {
-      const conferences = [...new Set(D1_SOCCER_PROGRAMS.map(p => p.conference))].sort();
+      const activePrograms = D1_SOCCER_PROGRAMS.filter(p => p.mens || p.womens);
+      const conferences = [...new Set(activePrograms.map(p => p.conference))].sort();
       conferenceChipsEl.innerHTML = '';
 
       conferences.forEach(conf => {
