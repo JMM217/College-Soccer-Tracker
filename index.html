@@ -47,6 +47,7 @@
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
+      height: 6px;
     }
     ::-webkit-scrollbar-track {
       background: #f0f7ff;
@@ -91,7 +92,7 @@
     <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-3 items-center justify-between">
       
       <!-- Search Input -->
-      <div class="relative w-full lg:w-80">
+      <div class="relative w-full lg:w-72">
         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
         <input 
           type="text" 
@@ -104,6 +105,18 @@
       <!-- Controls Group -->
       <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
         
+        <!-- View Mode Toggle: Conferences vs Rank Table -->
+        <div class="flex bg-brand-100 p-1 rounded-xl text-xs font-bold" role="group" aria-label="View mode">
+          <button id="btn-view-conf" class="view-btn active px-3 py-1 rounded-lg bg-white text-brand-800 shadow-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-layer-group text-brand-600"></i>
+            <span>Conferences</span>
+          </button>
+          <button id="btn-view-table" class="view-btn px-3 py-1 rounded-lg text-slate-600 hover:text-brand-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-trophy text-amber-500"></i>
+            <span>Rank Table</span>
+          </button>
+        </div>
+
         <!-- Recruit Shortlist Filter -->
         <button 
           id="btn-shortlist-filter" 
@@ -114,7 +127,7 @@
           <span>My Shortlist (<span id="shortlist-count">0</span>)</span>
         </button>
 
-        <!-- Sort Dropdown -->
+        <!-- Conference Sort Dropdown -->
         <div class="relative" id="sort-wrapper">
           <select 
             id="sort-filter" 
@@ -125,6 +138,23 @@
             <option value="ALPHA">Sort: A–Z</option>
           </select>
           <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-brand-600 text-[10px] pointer-events-none"></i>
+        </div>
+
+        <!-- Table Rank Sort Dropdown (Visible in Rank Table View) -->
+        <div class="relative hidden" id="table-sort-wrapper">
+          <select 
+            id="table-sort-filter" 
+            aria-label="Rank programs by"
+            class="appearance-none pl-3.5 pr-8 py-1.5 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+          >
+            <option value="NCAA_TITLES">Rank: NCAA Titles</option>
+            <option value="NCAA_APPS">Rank: NCAA Appearances</option>
+            <option value="CONF_TITLES">Rank: Conference Titles</option>
+            <option value="CONF_RATING">Rank: Conf. Power Rating</option>
+            <option value="CAPACITY">Rank: Stadium Capacity</option>
+            <option value="NAME">Rank: School A–Z</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-amber-700 text-[10px] pointer-events-none"></i>
         </div>
 
         <!-- State Filter Dropdown -->
@@ -155,10 +185,10 @@
   </section>
 
   <!-- Main Content Area -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-8 space-y-10">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-8 space-y-8">
     
-    <!-- Quick Conference Navigation Chips -->
-    <section>
+    <!-- Quick Conference Navigation Chips (Hidden in Rank Table View) -->
+    <section id="jump-nav-section">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-2">
           <i class="fa-solid fa-compass text-brand-500"></i> Jump to Conference
@@ -177,11 +207,64 @@
       <!-- Rendered dynamically -->
     </div>
 
+    <!-- All Programs Rank / Leaderboard Table View -->
+    <section id="rank-table-section" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-brand-100 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-brand-100 flex flex-wrap items-center justify-between gap-3 bg-brand-50/50">
+          <div>
+            <h2 id="rank-table-title" class="text-lg font-black text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-ranking-star text-brand-600"></i>
+              <span>Division I Soccer Program Leaderboard</span>
+            </h2>
+            <p id="rank-table-subtitle" class="text-xs text-slate-500 mt-0.5">
+              Click any column header to re-rank or click any row to inspect Home &amp; Away jersey replicas
+            </p>
+          </div>
+          <span id="rank-table-count" class="bg-white text-brand-800 px-3 py-1 rounded-full text-xs font-extrabold border border-brand-200 shadow-2xs">
+            0 Programs
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 border-b border-brand-100 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 select-none">
+                <th class="py-3.5 pl-5 pr-2 w-14 text-center">Rank</th>
+                <th class="py-3.5 px-3 cursor-pointer hover:text-brand-700 transition" onclick="setTableSort('NAME')">
+                  Program <i class="fa-solid fa-sort ml-1 text-slate-300"></i>
+                </th>
+                <th class="py-3.5 px-3 cursor-pointer hover:text-brand-700 transition" onclick="setTableSort('CONF_RATING')">
+                  Conference <i class="fa-solid fa-sort ml-1 text-slate-300"></i>
+                </th>
+                <th class="py-3.5 px-3">Teams</th>
+                <th class="py-3.5 px-3 text-center cursor-pointer hover:text-brand-700 transition" onclick="setTableSort('NCAA_TITLES')">
+                  NCAA Titles <i class="fa-solid fa-sort ml-1 text-slate-300"></i>
+                </th>
+                <th class="py-3.5 px-3 text-center cursor-pointer hover:text-brand-700 transition" onclick="setTableSort('NCAA_APPS')">
+                  NCAA Apps <i class="fa-solid fa-sort ml-1 text-slate-300"></i>
+                </th>
+                <th class="py-3.5 px-3 text-center cursor-pointer hover:text-brand-700 transition" onclick="setTableSort('CONF_TITLES')">
+                  Conf. Titles <i class="fa-solid fa-sort ml-1 text-slate-300"></i>
+                </th>
+                <th class="py-3.5 px-3 text-right cursor-pointer hover:text-brand-700 transition" onclick="setTableSort('CAPACITY')">
+                  Stadium Cap. <i class="fa-solid fa-sort ml-1 text-slate-300"></i>
+                </th>
+                <th class="py-3.5 pl-2 pr-5 text-center w-14">Save</th>
+              </tr>
+            </thead>
+            <tbody id="rank-table-body" class="divide-y divide-brand-100/70">
+              <!-- Rows rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Program Profile & Jersey Replica Modal -->
   <div id="program-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-school-name">
-    <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-brand-100 overflow-hidden my-auto animate-fade-in">
+    <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-brand-100 overflow-hidden my-auto">
       
       <!-- Dynamic School Color Banner Header -->
       <div id="modal-banner" class="relative px-6 py-6 text-white">
@@ -780,8 +863,6 @@
               <!-- Sleeve Cuffs -->
               <rect x="10" y="75" width="38" height="10" transform="rotate(28 24 80)" fill="${trimColor}" />
               <rect x="152" y="75" width="38" height="10" transform="rotate(-28 176 80)" fill="${trimColor}" />
-              <!-- Subtle Fabric Shading -->
-              <rect x="52" y="25" width="96" height="165" fill="url(#shade)" opacity="0.06" />
             </g>
 
             <!-- V-Neck Collar Trim -->
@@ -1253,10 +1334,12 @@
     // State Variables
     const SHORTLIST_STORAGE_KEY = 'pitch_map_recruit_shortlist_v1';
     const NOTES_STORAGE_KEY = 'pitch_map_recruit_notes_v1';
+    let currentView = 'CONF'; // 'CONF' | 'TABLE'
     let currentGender = 'ALL';
     let currentState = 'ALL';
     let currentSearch = '';
     let currentSort = 'RATING';
+    let currentTableSort = 'NCAA_TITLES';
     let onlyShortlist = false;
     let shortlistIds = new Set(loadJSONStorage(SHORTLIST_STORAGE_KEY, []));
     let recruitNotes = loadJSONStorage(NOTES_STORAGE_KEY, {});
@@ -1321,6 +1404,66 @@
       }
     }
 
+    // Switch between Conference View and Rank Table View
+    function setViewMode(mode) {
+      currentView = mode;
+      const btnConf = document.getElementById('btn-view-conf');
+      const btnTable = document.getElementById('btn-view-table');
+      const jumpSection = document.getElementById('jump-nav-section');
+      const confSections = document.getElementById('conference-sections');
+      const tableSection = document.getElementById('rank-table-section');
+      const confSortWrapper = document.getElementById('sort-wrapper');
+      const tableSortWrapper = document.getElementById('table-sort-wrapper');
+
+      if (mode === 'TABLE') {
+        btnTable.classList.add('bg-white', 'text-brand-800', 'shadow-sm');
+        btnTable.classList.remove('text-slate-600');
+        btnConf.classList.remove('bg-white', 'text-brand-800', 'shadow-sm');
+        btnConf.classList.add('text-slate-600');
+
+        jumpSection.classList.add('hidden');
+        confSections.classList.add('hidden');
+        tableSection.classList.remove('hidden');
+
+        confSortWrapper.classList.add('hidden');
+        tableSortWrapper.classList.remove('hidden');
+      } else {
+        btnConf.classList.add('bg-white', 'text-brand-800', 'shadow-sm');
+        btnConf.classList.remove('text-slate-600');
+        btnTable.classList.remove('bg-white', 'text-brand-800', 'shadow-sm');
+        btnTable.classList.add('text-slate-600');
+
+        jumpSection.classList.remove('hidden');
+        confSections.classList.remove('hidden');
+        tableSection.classList.add('hidden');
+
+        confSortWrapper.classList.remove('hidden');
+        tableSortWrapper.classList.add('hidden');
+      }
+
+      renderDashboard();
+    }
+
+    function setTableSort(sortKey) {
+      currentTableSort = sortKey;
+      document.getElementById('table-sort-filter').value = sortKey;
+      renderDashboard();
+    }
+
+    // Compute Gender-Aware Program Stat Totals for Leaderboard Ranking
+    function getProgramMetrics(program) {
+      const m = (currentGender !== 'WOMEN' && program.mens && program.mensStats) ? program.mensStats : null;
+      const w = (currentGender !== 'MEN' && program.womens && program.womensStats) ? program.womensStats : null;
+
+      return {
+        ncaaTitles: (m ? m.ncaaTitles : 0) + (w ? w.ncaaTitles : 0),
+        ncaaApps: (m ? m.ncaaApps : 0) + (w ? w.ncaaApps : 0),
+        confTitles: (m ? m.confTitles : 0) + (w ? w.confTitles : 0),
+        confRating: CONFERENCE_RATINGS[program.conference] || 0,
+        capacity: program.capacity || 0
+      };
+    }
+
     // Open School Detail & Jersey Replica Modal
     function openProgramModal(programId) {
       const program = D1_SOCCER_PROGRAMS.find(p => p.id === programId);
@@ -1331,7 +1474,6 @@
       const modal = document.getElementById('program-modal');
       const banner = document.getElementById('modal-banner');
 
-      // Style header banner with school primary color
       banner.style.background = `linear-gradient(135deg, ${profile.primary} 0%, #0f172a 140%)`;
 
       document.getElementById('modal-conf-badge').textContent = program.conference;
@@ -1343,7 +1485,6 @@
         <span><i class="fa-solid fa-location-dot mr-1"></i>${program.city}, ${program.state}</span>
       `;
 
-      // Official Color Swatches
       document.getElementById('modal-color-swatches').innerHTML = `
         <span class="inline-flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-brand-100">
           <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" style="background-color: ${profile.primary}"></span>
@@ -1352,13 +1493,11 @@
         </span>
       `;
 
-      // Home & Away Jersey Replicas
       document.getElementById('modal-jerseys-container').innerHTML = `
         ${createJerseySVG(program, profile, 'HOME')}
         ${createJerseySVG(program, profile, 'AWAY')}
       `;
 
-      // Quick Facts
       document.getElementById('modal-stadium').textContent = program.stadium;
       document.getElementById('modal-stadium-meta').textContent = `${program.capacity.toLocaleString()} seats • ${program.surface}`;
       document.getElementById('modal-conf-rating').innerHTML = renderStarRating(CONFERENCE_RATINGS[program.conference]);
@@ -1368,7 +1507,6 @@
       document.getElementById('modal-campus-type').textContent = `${profile.type} Institution`;
       document.getElementById('modal-enrollment').textContent = profile.enrollment;
 
-      // Detailed Postseason Cards
       const statsContainer = document.getElementById('modal-stats-container');
       statsContainer.innerHTML = '';
 
@@ -1426,7 +1564,6 @@
         `;
       }
 
-      // Recruit Notes
       const notesEl = document.getElementById('modal-recruit-notes');
       notesEl.value = recruitNotes[programId] || '';
       document.getElementById('modal-note-status').classList.add('opacity-0');
@@ -1463,6 +1600,7 @@
     // DOM Elements
     const searchInput = document.getElementById('search-input');
     const sortFilter = document.getElementById('sort-filter');
+    const tableSortFilter = document.getElementById('table-sort-filter');
     const stateFilter = document.getElementById('state-filter');
     const totalProgramsCount = document.getElementById('total-programs-count');
     const totalConferencesCount = document.getElementById('total-conferences-count');
@@ -1480,6 +1618,10 @@
       renderConferenceChips();
       renderDashboard();
 
+      // View Toggle Buttons
+      document.getElementById('btn-view-conf').addEventListener('click', () => setViewMode('CONF'));
+      document.getElementById('btn-view-table').addEventListener('click', () => setViewMode('TABLE'));
+
       // Setup Event Listeners
       searchInput.addEventListener('input', (e) => {
         currentSearch = e.target.value.toLowerCase().trim();
@@ -1495,6 +1637,11 @@
       sortFilter.addEventListener('change', (e) => {
         currentSort = e.target.value;
         renderConferenceChips();
+        renderDashboard();
+      });
+
+      tableSortFilter.addEventListener('change', (e) => {
+        currentTableSort = e.target.value;
         renderDashboard();
       });
 
@@ -1583,10 +1730,12 @@
       currentGender = 'ALL';
       currentState = 'ALL';
       currentSort = 'RATING';
+      currentTableSort = 'NCAA_TITLES';
       onlyShortlist = false;
       searchInput.value = '';
       stateFilter.value = 'ALL';
       sortFilter.value = 'RATING';
+      tableSortFilter.value = 'NCAA_TITLES';
       updateShortlistUI();
       renderConferenceChips();
       setGenderFilter('ALL', document.getElementById('btn-gender-all'));
@@ -1651,9 +1800,139 @@
       });
     }
 
-    // Main Render Loop Grouped by Conference
+    // Render Rank Table View
+    function renderRankTable(filtered) {
+      const tbody = document.getElementById('rank-table-body');
+      const countBadge = document.getElementById('rank-table-count');
+      const subtitleEl = document.getElementById('rank-table-subtitle');
+
+      countBadge.textContent = `${filtered.length} ${filtered.length === 1 ? 'Program' : 'Programs'}`;
+
+      const genderLabel = currentGender === 'MEN'
+        ? "Men's soccer stats"
+        : (currentGender === 'WOMEN' ? "Women's soccer stats" : "Combined Men's & Women's stats");
+      subtitleEl.textContent = `Showing ${genderLabel} • Click any column header to re-rank or click any row to inspect Home & Away jersey replicas`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="py-12 px-6 text-center text-slate-400">
+              <i class="fa-solid fa-futbol text-3xl mb-2 text-brand-200 block"></i>
+              <span class="font-bold text-slate-700 block">No matching programs in table</span>
+              <span class="text-xs">Try adjusting your filters or search query.</span>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const ranked = [...filtered].sort((a, b) => {
+        const mA = getProgramMetrics(a);
+        const mB = getProgramMetrics(b);
+
+        if (currentTableSort === 'NCAA_TITLES') {
+          if (mB.ncaaTitles !== mA.ncaaTitles) return mB.ncaaTitles - mA.ncaaTitles;
+          if (mB.ncaaApps !== mA.ncaaApps) return mB.ncaaApps - mA.ncaaApps;
+          return mB.confTitles - mA.confTitles;
+        }
+        if (currentTableSort === 'NCAA_APPS') {
+          if (mB.ncaaApps !== mA.ncaaApps) return mB.ncaaApps - mA.ncaaApps;
+          return mB.ncaaTitles - mA.ncaaTitles;
+        }
+        if (currentTableSort === 'CONF_TITLES') {
+          if (mB.confTitles !== mA.confTitles) return mB.confTitles - mA.confTitles;
+          return mB.ncaaApps - mA.ncaaApps;
+        }
+        if (currentTableSort === 'CONF_RATING') {
+          if (mB.confRating !== mA.confRating) return mB.confRating - mA.confRating;
+          return mB.ncaaApps - mA.ncaaApps;
+        }
+        if (currentTableSort === 'CAPACITY') {
+          if (mB.capacity !== mA.capacity) return mB.capacity - mA.capacity;
+        }
+        return a.name.localeCompare(b.name);
+      });
+
+      tbody.innerHTML = ranked.map((p, idx) => {
+        const rank = idx + 1;
+        const m = getProgramMetrics(p);
+        const profile = getSchoolProfile(p);
+        const isSaved = shortlistIds.has(p.id);
+        const hasNote = Boolean(recruitNotes[p.id]);
+
+        const rankBadge = rank <= 3
+          ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-lg font-black text-[11px] ${rank === 1 ? 'bg-amber-400 text-amber-950' : (rank === 2 ? 'bg-slate-200 text-slate-800' : 'bg-amber-700/20 text-amber-900')}">${rank}</span>`
+          : `<span class="font-bold text-slate-400">${rank}</span>`;
+
+        return `
+          <tr 
+            onclick="openProgramModal('${p.id}')"
+            class="${isSaved ? 'bg-rose-50/40' : 'hover:bg-brand-50/70'} transition-colors cursor-pointer group"
+          >
+            <td class="py-3 pl-5 pr-2 text-center">${rankBadge}</td>
+            <td class="py-3 px-3">
+              <div class="flex items-center gap-2.5">
+                <div class="flex -space-x-1 shrink-0">
+                  <span class="w-3.5 h-3.5 rounded-full border border-white shadow-2xs" style="background-color:${profile.primary}"></span>
+                  <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" style="background-color:${profile.secondary}"></span>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900 group-hover:text-brand-700 transition-colors flex items-center gap-1.5">
+                    <span>${p.name}</span>
+                    ${hasNote ? `<i class="fa-solid fa-note-sticky text-amber-500 text-[10px]" title="Has private recruit note"></i>` : ''}
+                  </div>
+                  <div class="text-[11px] text-slate-400 font-medium">${profile.nickname} • ${p.city}, ${p.state}</div>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 px-3 whitespace-nowrap">
+              <span class="inline-flex items-center gap-1 bg-brand-50 text-brand-800 font-bold px-2 py-0.5 rounded-lg border border-brand-100">
+                <span>${p.conference}</span>
+                <span class="text-amber-500 text-[10px]">★ ${m.confRating.toFixed(1)}</span>
+              </span>
+            </td>
+            <td class="py-3 px-3 whitespace-nowrap">
+              <div class="flex gap-1">
+                ${p.mens ? '<span class="bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded text-[10px]">M</span>' : ''}
+                ${p.womens ? '<span class="bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.5 rounded text-[10px]">W</span>' : ''}
+              </div>
+            </td>
+            <td class="py-3 px-3 text-center">
+              ${m.ncaaTitles > 0
+                ? `<span class="inline-flex items-center gap-1 bg-amber-100 text-amber-900 font-black px-2 py-0.5 rounded-md"><i class="fa-solid fa-trophy text-amber-500 text-[10px]"></i>${m.ncaaTitles}</span>`
+                : `<span class="text-slate-300 font-semibold">0</span>`
+              }
+            </td>
+            <td class="py-3 px-3 text-center font-extrabold text-slate-800">${m.ncaaApps}</td>
+            <td class="py-3 px-3 text-center font-bold text-slate-700">${m.confTitles}</td>
+            <td class="py-3 px-3 text-right font-medium text-slate-600 whitespace-nowrap">
+              ${p.capacity.toLocaleString()}
+              <span class="text-[10px] text-slate-400 block">${p.stadium}</span>
+            </td>
+            <td class="py-3 pl-2 pr-5 text-center">
+              <button 
+                type="button"
+                onclick="toggleShortlist('${p.id}', event)"
+                aria-label="${isSaved ? 'Remove from shortlist' : 'Add to shortlist'}"
+                class="w-7 h-7 rounded-lg inline-flex items-center justify-center border transition ${isSaved ? 'bg-rose-500 text-white border-rose-500' : 'bg-white text-slate-400 hover:text-rose-500 border-brand-100'}"
+              >
+                <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-heart text-[11px]"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Main Render Loop Grouped by Conference (or Rank Table)
     function renderDashboard() {
       const filtered = getFilteredPrograms();
+
+      if (currentView === 'TABLE') {
+        renderRankTable(filtered);
+        return;
+      }
+
       conferenceSectionsEl.innerHTML = '';
 
       if (filtered.length === 0) {
