@@ -104,6 +104,19 @@
       <!-- Controls Group -->
       <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
         
+        <!-- Sort Dropdown -->
+        <div class="relative">
+          <select 
+            id="sort-filter" 
+            aria-label="Sort conferences"
+            class="appearance-none pl-3.5 pr-8 py-1.5 bg-brand-50 border border-brand-200 rounded-xl text-xs font-semibold text-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
+          >
+            <option value="RATING">Sort: Power Rating</option>
+            <option value="ALPHA">Sort: A–Z</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-brand-600 text-[10px] pointer-events-none"></i>
+        </div>
+
         <!-- State Filter Dropdown -->
         <div class="relative">
           <select 
@@ -152,6 +165,67 @@
   </main>
 
   <script>
+    // Conference Power Rankings (Out of 5 Stars)
+    const CONFERENCE_RATINGS = {
+      "ACC": 5.0,
+      "Big Ten": 5.0,
+      "SEC": 5.0,
+      "Big 12": 4.5,
+      "Big East": 4.5,
+      "Sun Belt": 4.0,
+      "AAC": 4.0,
+      "WCC": 4.0,
+      "Big West": 4.0,
+      "Mountain West": 4.0,
+      "Atlantic 10": 3.5,
+      "Ivy League": 3.5,
+      "Pac-12": 3.0,
+      "CAA": 3.0,
+      "Patriot League": 3.0,
+      "SoCon": 3.0,
+      "WAC": 3.0,
+      "MVC": 2.5,
+      "Summit League": 2.5,
+      "ASUN": 2.5,
+      "Big South": 2.5,
+      "Southland": 2.5,
+      "SWAC": 2.5,
+      "CUSA": 2.0,
+      "MAC": 2.0,
+      "MAAC": 2.0,
+      "America East": 2.0,
+      "Horizon League": 2.0,
+      "Big Sky": 2.0,
+      "OVC": 2.0,
+      "NEC": 1.5
+    };
+
+    // Helper to render 5-star icons
+    function renderStarRating(rating) {
+      const score = rating || 2.5;
+      const fullStars = Math.floor(score);
+      const hasHalf = score % 1 >= 0.5;
+      const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+
+      let starsHtml = '';
+      for (let i = 0; i < fullStars; i++) {
+        starsHtml += '<i class="fa-solid fa-star text-amber-400"></i>';
+      }
+      if (hasHalf) {
+        starsHtml += '<i class="fa-solid fa-star-half-stroke text-amber-400"></i>';
+      }
+      for (let i = 0; i < emptyStars; i++) {
+        starsHtml += '<i class="fa-regular fa-star text-slate-300"></i>';
+      }
+
+      return `
+        <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-xl" title="Conference Power Rating: ${score.toFixed(1)} / 5.0">
+          <div class="flex items-center gap-0.5 text-xs">${starsHtml}</div>
+          <span class="text-xs font-extrabold text-amber-900">${score.toFixed(1)}</span>
+        </div>
+      `;
+    }
+
     // NCAA Division I Soccer Programs Dataset with Detailed Program Statistics (2026 Season)
     const D1_SOCCER_PROGRAMS = [
       // ACC
@@ -574,9 +648,11 @@
     let currentGender = 'ALL';
     let currentState = 'ALL';
     let currentSearch = '';
+    let currentSort = 'RATING';
 
     // DOM Elements
     const searchInput = document.getElementById('search-input');
+    const sortFilter = document.getElementById('sort-filter');
     const stateFilter = document.getElementById('state-filter');
     const totalProgramsCount = document.getElementById('total-programs-count');
     const totalConferencesCount = document.getElementById('total-conferences-count');
@@ -599,6 +675,12 @@
         renderDashboard();
       });
 
+      sortFilter.addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        renderConferenceChips();
+        renderDashboard();
+      });
+
       stateFilter.addEventListener('change', (e) => {
         currentState = e.target.value;
         renderDashboard();
@@ -611,6 +693,18 @@
 
       resetFiltersBtn.addEventListener('click', resetFilters);
     };
+
+    // Sort conference names either by Power Rating (desc) or A-Z
+    function sortConferences(confNames) {
+      return [...confNames].sort((a, b) => {
+        if (currentSort === 'RATING') {
+          const rA = CONFERENCE_RATINGS[a] || 0;
+          const rB = CONFERENCE_RATINGS[b] || 0;
+          if (rB !== rA) return rB - rA;
+        }
+        return a.localeCompare(b);
+      });
+    }
 
     // Populate State Filter Dropdown
     function populateStateDropdown() {
@@ -641,8 +735,11 @@
       currentSearch = '';
       currentGender = 'ALL';
       currentState = 'ALL';
+      currentSort = 'RATING';
       searchInput.value = '';
       stateFilter.value = 'ALL';
+      sortFilter.value = 'RATING';
+      renderConferenceChips();
       setGenderFilter('ALL', document.getElementById('btn-gender-all'));
     }
 
@@ -668,14 +765,15 @@
     // Render Jump-to Chips
     function renderConferenceChips() {
       const activePrograms = D1_SOCCER_PROGRAMS.filter(p => p.mens || p.womens);
-      const conferences = [...new Set(activePrograms.map(p => p.conference))].sort();
+      const conferences = sortConferences([...new Set(activePrograms.map(p => p.conference))]);
       conferenceChipsEl.innerHTML = '';
 
       conferences.forEach(conf => {
+        const rating = CONFERENCE_RATINGS[conf];
         const chip = document.createElement('a');
         chip.href = `#conf-${conf.replace(/\s+/g, '-').toLowerCase()}`;
-        chip.className = "px-3 py-1.5 bg-white hover:bg-brand-500 hover:text-white border border-brand-200 text-brand-800 font-semibold text-xs rounded-xl transition-all shadow-sm";
-        chip.textContent = conf;
+        chip.className = "px-3 py-1.5 bg-white hover:bg-brand-500 hover:text-white border border-brand-200 text-brand-800 font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5";
+        chip.innerHTML = `<span>${conf}</span>${rating ? `<span class="text-amber-500 text-[10px] font-bold">★ ${rating.toFixed(1)}</span>` : ''}`;
         conferenceChipsEl.appendChild(chip);
       });
     }
@@ -727,8 +825,9 @@
       });
 
       // Render each conference section
-      Object.keys(grouped).sort().forEach(conf => {
+      sortConferences(Object.keys(grouped)).forEach(conf => {
         const teams = grouped[conf];
+        const rating = CONFERENCE_RATINGS[conf];
         const sectionId = `conf-${conf.replace(/\s+/g, '-').toLowerCase()}`;
 
         const section = document.createElement('section');
@@ -736,12 +835,13 @@
         section.className = "bg-white rounded-2xl border border-brand-100 shadow-sm overflow-hidden p-6 space-y-4 scroll-mt-[150px]";
 
         section.innerHTML = `
-          <div class="flex items-center justify-between border-b border-brand-100 pb-4">
-            <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-brand-100 pb-4">
+            <div class="flex flex-wrap items-center gap-3">
               <div class="bg-brand-100 text-brand-700 px-3 py-1 rounded-xl text-sm font-black uppercase tracking-wider">
                 ${conf}
               </div>
               <h2 class="text-xl font-bold text-slate-900">${conf} Conference</h2>
+              ${renderStarRating(rating)}
             </div>
             <span class="bg-brand-50 text-brand-700 px-2.5 py-1 rounded-full text-xs font-bold border border-brand-100">
               ${teams.length} ${teams.length === 1 ? 'Team' : 'Teams'}
