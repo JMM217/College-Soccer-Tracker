@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pitch Map — NCAA Division I Soccer Explorer</title>
   
-  <!-- FontAwesome for Icons -->
   <!-- Google Fonts: Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -96,7 +96,7 @@
         <input 
           type="text" 
           id="search-input" 
-          placeholder="Search school, city, conference, or stadium..." 
+          placeholder="Search school, mascot, city, conference..." 
           class="w-full pl-10 pr-4 py-2 bg-brand-50 border border-brand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-700 placeholder-slate-400"
         >
       </div>
@@ -159,9 +159,14 @@
     
     <!-- Quick Conference Navigation Chips -->
     <section>
-      <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-        <i class="fa-solid fa-compass text-brand-500"></i> Jump to Conference
-      </h2>
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+          <i class="fa-solid fa-compass text-brand-500"></i> Jump to Conference
+        </h2>
+        <span class="text-xs text-slate-400 font-medium">
+          <i class="fa-solid fa-shirt text-brand-500 mr-1"></i> Click any school card to view jerseys, mascot &amp; program profile
+        </span>
+      </div>
       <div id="conference-chips" class="flex flex-wrap gap-2">
         <!-- Dynamically Generated Chips -->
       </div>
@@ -173,6 +178,103 @@
     </div>
 
   </main>
+
+  <!-- Program Profile & Jersey Replica Modal -->
+  <div id="program-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-school-name">
+    <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-brand-100 overflow-hidden my-auto animate-fade-in">
+      
+      <!-- Dynamic School Color Banner Header -->
+      <div id="modal-banner" class="relative px-6 py-6 text-white">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+              <span id="modal-conf-badge" class="bg-white/20 backdrop-blur-xs text-white text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-lg">ACC</span>
+              <span id="modal-type-badge" class="bg-black/25 text-white/95 text-[11px] font-semibold px-2.5 py-0.5 rounded-lg">Public • ~28,000 Undergrads</span>
+            </div>
+            <h2 id="modal-school-name" class="text-2xl font-black tracking-tight leading-tight">School Name</h2>
+            <p id="modal-nickname-location" class="text-sm font-semibold text-white/90 mt-1 flex flex-wrap items-center gap-2">
+              <span>Nickname</span>
+              <span>•</span>
+              <span>City, State</span>
+            </p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button id="modal-shortlist-btn" type="button" class="w-10 h-10 rounded-xl bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition border border-white/20" title="Toggle Recruit Shortlist">
+              <i class="fa-regular fa-heart text-base"></i>
+            </button>
+            <button id="modal-close-btn" type="button" aria-label="Close modal" class="w-10 h-10 rounded-xl bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition border border-white/20">
+              <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-6 max-h-[78vh] overflow-y-auto">
+        
+        <!-- Jersey Replicas & Official Colors -->
+        <div class="bg-brand-50/70 rounded-2xl p-5 border border-brand-100">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-brand-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-shirt text-brand-600"></i> Official Kit Replicas &amp; School Colors
+            </h3>
+            <div id="modal-color-swatches" class="flex items-center gap-2 text-xs font-semibold text-slate-700">
+              <!-- Color swatches injected here -->
+            </div>
+          </div>
+
+          <div id="modal-jerseys-container" class="grid grid-cols-2 gap-4">
+            <!-- Home & Away SVG Jersey Replicas injected here -->
+          </div>
+        </div>
+
+        <!-- Campus, Stadium & Conference Quick Facts -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div class="bg-white rounded-xl p-3.5 border border-brand-100 shadow-2xs">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Home Pitch</div>
+            <div id="modal-stadium" class="font-bold text-slate-800 text-sm leading-snug">Stadium Name</div>
+            <div id="modal-stadium-meta" class="text-slate-500 mt-1">Capacity • Surface</div>
+          </div>
+
+          <div class="bg-white rounded-xl p-3.5 border border-brand-100 shadow-2xs">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Conference Power</div>
+            <div id="modal-conf-rating" class="mt-0.5"></div>
+            <div id="modal-sponsors" class="text-slate-500 mt-1.5 font-medium">Men's &amp; Women's</div>
+          </div>
+
+          <div class="bg-white rounded-xl p-3.5 border border-brand-100 shadow-2xs">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Campus Profile</div>
+            <div id="modal-campus-type" class="font-bold text-slate-800 text-sm">Public University</div>
+            <div id="modal-enrollment" class="text-slate-500 mt-1">~25,000 students</div>
+          </div>
+        </div>
+
+        <!-- Postseason History Breakdown -->
+        <div id="modal-stats-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Men's & Women's detailed cards injected here -->
+        </div>
+
+        <!-- Private Recruit Notes (Saved in Browser) -->
+        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-2">
+          <div class="flex items-center justify-between">
+            <label for="modal-recruit-notes" class="text-xs font-extrabold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+              <i class="fa-solid fa-pen-to-square text-brand-600"></i> My Private Recruit Notes
+            </label>
+            <span id="modal-note-status" class="text-[11px] font-semibold text-emerald-600 opacity-0 transition-opacity">
+              <i class="fa-solid fa-check mr-0.5"></i> Saved
+            </span>
+          </div>
+          <textarea 
+            id="modal-recruit-notes" 
+            rows="2" 
+            placeholder="Jot down coach contacts, ID camp dates, academic majors, or campus visit notes (saved automatically on this device)..."
+            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+          ></textarea>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   <script>
     // Conference Power Rankings (Out of 5 Stars)
@@ -209,6 +311,500 @@
       "OVC": 2.0,
       "NEC": 1.5
     };
+
+    // Detailed Branding, Nicknames, Official Colors & Campus Metadata for D1 Programs
+    const SCHOOL_PROFILES = {
+      clemson: { nickname: "Tigers", primary: "#F56600", secondary: "#522D80", colorNames: "Clemson Orange & Regalia", type: "Public", enrollment: "~22,500 undergrads", pattern: "sash" },
+      unc: { nickname: "Tar Heels", primary: "#7BAFD4", secondary: "#13294B", colorNames: "Carolina Blue & Navy", type: "Public", enrollment: "~20,000 undergrads", pattern: "hoops" },
+      virginia: { nickname: "Cavaliers", primary: "#232D4B", secondary: "#F84C1E", colorNames: "Jefferson Blue & Cavalier Orange", type: "Public", enrollment: "~17,500 undergrads", pattern: "stripes" },
+      duke: { nickname: "Blue Devils", primary: "#003087", secondary: "#FFFFFF", colorNames: "Duke Blue & White", type: "Private", enrollment: "~6,600 undergrads", pattern: "stripes" },
+      fsu: { nickname: "Seminoles", primary: "#782F40", secondary: "#CEB888", colorNames: "Garnet & Gold", type: "Public", enrollment: "~33,000 undergrads", pattern: "sash" },
+      wake: { nickname: "Demon Deacons", primary: "#9E7E38", secondary: "#000000", colorNames: "Old Gold & Black", type: "Private", enrollment: "~5,400 undergrads", pattern: "stripes" },
+      nd: { nickname: "Fighting Irish", primary: "#0C2340", secondary: "#C99700", colorNames: "Navy Blue & Metallic Gold", type: "Private", enrollment: "~8,900 undergrads", pattern: "hoops" },
+      pitt: { nickname: "Panthers", primary: "#003594", secondary: "#FFB81C", colorNames: "Pitt Royal & Gold", type: "Public", enrollment: "~24,000 undergrads", pattern: "stripes" },
+      syracuse: { nickname: "Orange", primary: "#F76900", secondary: "#000E54", colorNames: "Syracuse Orange & Navy", type: "Private", enrollment: "~15,200 undergrads", pattern: "sash" },
+      stanford: { nickname: "Cardinal", primary: "#8C1515", secondary: "#FFFFFF", colorNames: "Cardinal Red & White", type: "Private", enrollment: "~7,800 undergrads", pattern: "solid" },
+      cal: { nickname: "Golden Bears", primary: "#003262", secondary: "#FDB515", colorNames: "Berkeley Blue & California Gold", type: "Public", enrollment: "~33,000 undergrads", pattern: "hoops" },
+      smu: { nickname: "Mustangs", primary: "#CC0035", secondary: "#354CA1", colorNames: "Harvard Crimson & Yale Blue", type: "Private", enrollment: "~7,100 undergrads", pattern: "stripes" },
+      louisville: { nickname: "Cardinals", primary: "#AD0000", secondary: "#000000", colorNames: "Cardinal Red & Black", type: "Public", enrollment: "~16,000 undergrads", pattern: "sash" },
+      bc: { nickname: "Eagles", primary: "#98002E", secondary: "#BC9B6A", colorNames: "Maroon & Gold", type: "Private", enrollment: "~9,500 undergrads", pattern: "stripes" },
+      ncstate: { nickname: "Wolfpack", primary: "#CC0000", secondary: "#000000", colorNames: "Wolfpack Red & Black", type: "Public", enrollment: "~27,000 undergrads", pattern: "stripes" },
+      vt: { nickname: "Hokies", primary: "#630031", secondary: "#CF4420", colorNames: "Chicago Maroon & Burnt Orange", type: "Public", enrollment: "~30,500 undergrads", pattern: "stripes" },
+      georgiatech: { nickname: "Yellow Jackets", primary: "#B3A369", secondary: "#003057", colorNames: "Tech Gold & Navy Blue", type: "Public", enrollment: "~19,500 undergrads", pattern: "hoops" },
+      miamifl: { nickname: "Hurricanes", primary: "#F47321", secondary: "#005030", colorNames: "Orange, Green & White", type: "Private", enrollment: "~12,500 undergrads", pattern: "stripes" },
+
+      indiana: { nickname: "Hoosiers", primary: "#990000", secondary: "#EEEDEB", colorNames: "Crimson & Cream", type: "Public", enrollment: "~36,000 undergrads", pattern: "stripes" },
+      md: { nickname: "Terrapins", primary: "#E03A3E", secondary: "#FFD520", colorNames: "Red, White, Black & Gold", type: "Public", enrollment: "~30,500 undergrads", pattern: "hoops" },
+      ucla: { nickname: "Bruins", primary: "#2774AE", secondary: "#FFD100", colorNames: "True Blue & Westwood Gold", type: "Public", enrollment: "~32,500 undergrads", pattern: "sash" },
+      washington: { nickname: "Huskies", primary: "#4B2E83", secondary: "#B7A57A", colorNames: "Husky Purple & Gold", type: "Public", enrollment: "~36,000 undergrads", pattern: "stripes" },
+      pennstate: { nickname: "Nittany Lions", primary: "#041E42", secondary: "#FFFFFF", colorNames: "Nittany Navy & White", type: "Public", enrollment: "~42,000 undergrads", pattern: "solid" },
+      michigan: { nickname: "Wolverines", primary: "#00274C", secondary: "#FFCB05", colorNames: "Michigan Blue & Maize", type: "Public", enrollment: "~33,500 undergrads", pattern: "stripes" },
+      msu: { nickname: "Spartans", primary: "#18453B", secondary: "#FFFFFF", colorNames: "Spartan Green & White", type: "Public", enrollment: "~40,000 undergrads", pattern: "stripes" },
+      "ohio-state": { nickname: "Buckeyes", primary: "#BB0000", secondary: "#666666", colorNames: "Scarlet & Gray", type: "Public", enrollment: "~46,000 undergrads", pattern: "stripes" },
+      wisconsin: { nickname: "Badgers", primary: "#C5050C", secondary: "#FFFFFF", colorNames: "Badger Red & White", type: "Public", enrollment: "~37,000 undergrads", pattern: "sash" },
+      rutgers: { nickname: "Scarlet Knights", primary: "#CC0033", secondary: "#5F6A72", colorNames: "Scarlet & Gray", type: "Public", enrollment: "~36,500 undergrads", pattern: "solid" },
+      usc: { nickname: "Trojans", primary: "#990000", secondary: "#FFC72C", colorNames: "Cardinal & Gold", type: "Private", enrollment: "~21,000 undergrads", pattern: "hoops" },
+      northwestern: { nickname: "Wildcats", primary: "#4E2A84", secondary: "#FFFFFF", colorNames: "Northwestern Purple & White", type: "Private", enrollment: "~8,800 undergrads", pattern: "hoops" },
+      illinois: { nickname: "Fighting Illini", primary: "#E84A27", secondary: "#13294B", colorNames: "Illini Orange & Blue", type: "Public", enrollment: "~35,000 undergrads", pattern: "stripes" },
+      iowa: { nickname: "Hawkeyes", primary: "#FFCD00", secondary: "#000000", colorNames: "Black & Gold", type: "Public", enrollment: "~22,500 undergrads", pattern: "stripes" },
+      minnesota: { nickname: "Golden Gophers", primary: "#7A0019", secondary: "#FFCC33", colorNames: "Maroon & Gold", type: "Public", enrollment: "~39,000 undergrads", pattern: "stripes" },
+      nebraska: { nickname: "Cornhuskers", primary: "#E41C38", secondary: "#FDF2D9", colorNames: "Scarlet & Cream", type: "Public", enrollment: "~19,500 undergrads", pattern: "solid" },
+      oregon: { nickname: "Ducks", primary: "#154733", secondary: "#FEE123", colorNames: "Oregon Green & Yellow", type: "Public", enrollment: "~19,500 undergrads", pattern: "stripes" },
+      purdue: { nickname: "Boilermakers", primary: "#CEB888", secondary: "#000000", colorNames: "Old Gold & Black", type: "Public", enrollment: "~39,000 undergrads", pattern: "stripes" },
+
+      arkansas: { nickname: "Razorbacks", primary: "#9D2235", secondary: "#FFFFFF", colorNames: "Cardinal & White", type: "Public", enrollment: "~27,500 undergrads", pattern: "stripes" },
+      tamui: { nickname: "Aggies", primary: "#500000", secondary: "#FFFFFF", colorNames: "Aggie Maroon & White", type: "Public", enrollment: "~60,000 undergrads", pattern: "solid" },
+      alabama: { nickname: "Crimson Tide", primary: "#9E1B32", secondary: "#828A8F", colorNames: "Crimson & White", type: "Public", enrollment: "~33,000 undergrads", pattern: "solid" },
+      "south-carolina": { nickname: "Gamecocks", primary: "#73000A", secondary: "#000000", colorNames: "Garnet & Black", type: "Public", enrollment: "~28,000 undergrads", pattern: "stripes" },
+      tennessee: { nickname: "Volunteers", primary: "#FF8200", secondary: "#FFFFFF", colorNames: "Tennessee Orange & White", type: "Public", enrollment: "~29,000 undergrads", pattern: "sash" },
+      texas: { nickname: "Longhorns", primary: "#BF5700", secondary: "#FFFFFF", colorNames: "Burnt Orange & White", type: "Public", enrollment: "~42,000 undergrads", pattern: "solid" },
+      oklahoma: { nickname: "Sooners", primary: "#841617", secondary: "#FDF9D8", colorNames: "Crimson & Cream", type: "Public", enrollment: "~22,000 undergrads", pattern: "stripes" },
+      kentucky: { nickname: "Wildcats", primary: "#0033A0", secondary: "#FFFFFF", colorNames: "Kentucky Blue & White", type: "Public", enrollment: "~23,500 undergrads", pattern: "stripes" },
+      auburn: { nickname: "Tigers", primary: "#0C2340", secondary: "#E87722", colorNames: "Burnt Orange & Navy Blue", type: "Public", enrollment: "~26,500 undergrads", pattern: "stripes" },
+      florida: { nickname: "Gators", primary: "#0021A5", secondary: "#FA4616", colorNames: "Orange & Blue", type: "Public", enrollment: "~35,000 undergrads", pattern: "stripes" },
+      georgia: { nickname: "Bulldogs", primary: "#BA0C2F", secondary: "#000000", colorNames: "Red & Black", type: "Public", enrollment: "~31,500 undergrads", pattern: "stripes" },
+      lsu: { nickname: "Tigers", primary: "#461D7C", secondary: "#FDD023", colorNames: "Purple & Gold", type: "Public", enrollment: "~31,000 undergrads", pattern: "hoops" },
+      olemiss: { nickname: "Rebels", primary: "#CE1126", secondary: "#14213D", colorNames: "Cardinal Red & Navy Blue", type: "Public", enrollment: "~19,500 undergrads", pattern: "stripes" },
+      msstate: { nickname: "Bulldogs", primary: "#660000", secondary: "#FFFFFF", colorNames: "Maroon & White", type: "Public", enrollment: "~18,500 undergrads", pattern: "solid" },
+      mizzou: { nickname: "Tigers", primary: "#F1B82D", secondary: "#000000", colorNames: "Mizzou Gold & Black", type: "Public", enrollment: "~24,000 undergrads", pattern: "stripes" },
+      vanderbilt: { nickname: "Commodores", primary: "#866D4B", secondary: "#000000", colorNames: "Black & Gold", type: "Private", enrollment: "~7,100 undergrads", pattern: "stripes" },
+
+      byu: { nickname: "Cougars", primary: "#002E5D", secondary: "#FFFFFF", colorNames: "Royal Blue & White", type: "Private", enrollment: "~31,500 undergrads", pattern: "sash" },
+      wvu: { nickname: "Mountaineers", primary: "#002855", secondary: "#EAAA00", colorNames: "Old Gold & Blue", type: "Public", enrollment: "~19,500 undergrads", pattern: "sash" },
+      ucf: { nickname: "Knights", primary: "#BA9B37", secondary: "#000000", colorNames: "Black & Gold", type: "Public", enrollment: "~59,000 undergrads", pattern: "stripes" },
+      tcu: { nickname: "Horned Frogs", primary: "#4D1979", secondary: "#A3A9AC", colorNames: "Purple & White", type: "Private", enrollment: "~10,900 undergrads", pattern: "stripes" },
+      baylor: { nickname: "Bears", primary: "#154734", secondary: "#FFB81C", colorNames: "Green & Gold", type: "Private", enrollment: "~15,200 undergrads", pattern: "stripes" },
+      okstate: { nickname: "Cowgirls", primary: "#FF7300", secondary: "#000000", colorNames: "Orange & Black", type: "Public", enrollment: "~21,500 undergrads", pattern: "stripes" },
+      texastech: { nickname: "Red Raiders", primary: "#CC0000", secondary: "#000000", colorNames: "Scarlet & Black", type: "Public", enrollment: "~33,000 undergrads", pattern: "stripes" },
+      kansas: { nickname: "Jayhawks", primary: "#0051BA", secondary: "#E8000D", colorNames: "Crimson & Blue", type: "Public", enrollment: "~20,000 undergrads", pattern: "stripes" },
+      ksu: { nickname: "Wildcats", primary: "#512888", secondary: "#D1D1D1", colorNames: "Royal Purple & Silver", type: "Public", enrollment: "~15,500 undergrads", pattern: "solid" },
+      colorado: { nickname: "Buffaloes", primary: "#CFB87C", secondary: "#000000", colorNames: "Silver & Gold", type: "Public", enrollment: "~31,000 undergrads", pattern: "stripes" },
+      utah: { nickname: "Utes", primary: "#CC0000", secondary: "#000000", colorNames: "Crimson & White", type: "Public", enrollment: "~26,500 undergrads", pattern: "stripes" },
+      arizona: { nickname: "Wildcats", primary: "#CC0033", secondary: "#003366", colorNames: "Cardinal Red & Navy Blue", type: "Public", enrollment: "~40,500 undergrads", pattern: "stripes" },
+      asu: { nickname: "Sun Devils", primary: "#8C1D40", secondary: "#FFC627", colorNames: "Maroon & Gold", type: "Public", enrollment: "~65,000 undergrads", pattern: "hoops" },
+      cincinnati: { nickname: "Bearcats", primary: "#E00122", secondary: "#000000", colorNames: "Red & Black", type: "Public", enrollment: "~32,000 undergrads", pattern: "stripes" },
+      houston: { nickname: "Cougars", primary: "#C8102E", secondary: "#FFFFFF", colorNames: "Scarlet Red & Albino White", type: "Public", enrollment: "~38,500 undergrads", pattern: "solid" },
+      iastate: { nickname: "Cyclones", primary: "#C8102E", secondary: "#F1BE48", colorNames: "Cardinal & Gold", type: "Public", enrollment: "~25,500 undergrads", pattern: "hoops" },
+
+      georgetown: { nickname: "Hoyas", primary: "#041E42", secondary: "#8D817B", colorNames: "Blue & Gray", type: "Private", enrollment: "~7,900 undergrads", pattern: "hoops" },
+      creighton: { nickname: "Bluejays", primary: "#005CA9", secondary: "#FFFFFF", colorNames: "Bluejay Blue & White", type: "Private", enrollment: "~4,400 undergrads", pattern: "stripes" },
+      providence: { nickname: "Friars", primary: "#000000", secondary: "#8A8D8F", colorNames: "Black, White & Silver", type: "Private", enrollment: "~4,200 undergrads", pattern: "stripes" },
+      stjohns: { nickname: "Red Storm", primary: "#BA0C2F", secondary: "#FFFFFF", colorNames: "Red & White", type: "Private", enrollment: "~15,500 undergrads", pattern: "sash" },
+      xavier: { nickname: "Musketeers", primary: "#0C2340", secondary: "#9EA2A2", colorNames: "Navy Blue, Gray & White", type: "Private", enrollment: "~4,900 undergrads", pattern: "stripes" },
+      butler: { nickname: "Bulldogs", primary: "#13294B", secondary: "#FFFFFF", colorNames: "Butler Blue & White", type: "Private", enrollment: "~4,500 undergrads", pattern: "solid" },
+      marquette: { nickname: "Golden Eagles", primary: "#003366", secondary: "#FFCC00", colorNames: "Marquette Blue & Gold", type: "Private", enrollment: "~7,600 undergrads", pattern: "hoops" },
+      villanova: { nickname: "Wildcats", primary: "#00205B", secondary: "#13B5EA", colorNames: "Villanova Blue & White", type: "Private", enrollment: "~7,000 undergrads", pattern: "stripes" },
+      uconn: { nickname: "Huskies", primary: "#000E2F", secondary: "#E4002B", colorNames: "National Flag Blue & White", type: "Public", enrollment: "~19,000 undergrads", pattern: "solid" },
+      setonhall: { nickname: "Pirates", primary: "#004488", secondary: "#A2AAAD", colorNames: "Seton Hall Blue & White", type: "Private", enrollment: "~6,100 undergrads", pattern: "stripes" },
+      depaul: { nickname: "Blue Demons", primary: "#005EB8", secondary: "#E4002B", colorNames: "Royal Blue & Scarlet", type: "Private", enrollment: "~14,200 undergrads", pattern: "stripes" },
+
+      cornell: { nickname: "Big Red", primary: "#B31B1B", secondary: "#FFFFFF", colorNames: "Carnelian Red & White", type: "Private", enrollment: "~15,700 undergrads", pattern: "stripes" },
+      penn: { nickname: "Quakers", primary: "#990000", secondary: "#011F5B", colorNames: "Red & Blue", type: "Private", enrollment: "~10,000 undergrads", pattern: "stripes" },
+      yale: { nickname: "Bulldogs", primary: "#00356B", secondary: "#FFFFFF", colorNames: "Yale Blue & White", type: "Private", enrollment: "~6,600 undergrads", pattern: "solid" },
+      princeton: { nickname: "Tigers", primary: "#FF671F", secondary: "#000000", colorNames: "Orange & Black", type: "Private", enrollment: "~5,600 undergrads", pattern: "hoops" },
+      harvard: { nickname: "Crimson", primary: "#A51C30", secondary: "#1E1E1E", colorNames: "Harvard Crimson & Black", type: "Private", enrollment: "~7,100 undergrads", pattern: "solid" },
+      brown: { nickname: "Bears", primary: "#4E3629", secondary: "#ED1C24", colorNames: "Seal Brown & Cardinal Red", type: "Private", enrollment: "~7,600 undergrads", pattern: "stripes" },
+      dartmouth: { nickname: "Big Green", primary: "#00693E", secondary: "#FFFFFF", colorNames: "Dartmouth Green & White", type: "Private", enrollment: "~4,400 undergrads", pattern: "solid" },
+      columbia: { nickname: "Lions", primary: "#B9D9EB", secondary: "#003087", colorNames: "Columbia Blue & White", type: "Private", enrollment: "~8,800 undergrads", pattern: "stripes" },
+
+      portland: { nickname: "Pilots", primary: "#1E1656", secondary: "#FFFFFF", colorNames: "Royal Purple & White", type: "Private", enrollment: "~3,400 undergrads", pattern: "sash" },
+      santaclara: { nickname: "Broncos", primary: "#862633", secondary: "#FFFFFF", colorNames: "Bronco Red & White", type: "Private", enrollment: "~6,100 undergrads", pattern: "solid" },
+      sanfrancisco: { nickname: "Dons", primary: "#00543C", secondary: "#FDBB30", colorNames: "Green & Gold", type: "Private", enrollment: "~5,900 undergrads", pattern: "stripes" },
+      lmu: { nickname: "Lions", primary: "#862633", secondary: "#0077C8", colorNames: "Crimson & Navy/Blue", type: "Private", enrollment: "~7,200 undergrads", pattern: "stripes" },
+      pepperdine: { nickname: "Waves", primary: "#00205B", secondary: "#EE7624", colorNames: "Blue & Orange", type: "Private", enrollment: "~3,600 undergrads", pattern: "sash" },
+      sandiego: { nickname: "Toreros", primary: "#003B70", secondary: "#75B2DD", colorNames: "Torero Blue, Navy & White", type: "Private", enrollment: "~5,700 undergrads", pattern: "stripes" },
+      stmarys: { nickname: "Gaels", primary: "#06315B", secondary: "#D80024", colorNames: "Navy Blue & Red", type: "Private", enrollment: "~2,000 undergrads", pattern: "stripes" },
+      pacific: { nickname: "Tigers", primary: "#FF671F", secondary: "#000000", colorNames: "Orange & Black", type: "Private", enrollment: "~3,500 undergrads", pattern: "stripes" },
+      seattleu: { nickname: "Redhawks", primary: "#AA0000", secondary: "#000000", colorNames: "Red & Black", type: "Private", enrollment: "~4,200 undergrads", pattern: "stripes" },
+
+      usf: { nickname: "Bulls", primary: "#006747", secondary: "#CFC493", colorNames: "USF Green & Gold", type: "Public", enrollment: "~37,000 undergrads", pattern: "solid" },
+      tulsa: { nickname: "Golden Hurricane", primary: "#002D72", secondary: "#C8102E", colorNames: "Old Gold, Royal Blue & Crimson", type: "Private", enrollment: "~2,600 undergrads", pattern: "stripes" },
+      memphis: { nickname: "Tigers", primary: "#003087", secondary: "#898D8D", colorNames: "Memphis Blue & Gray", type: "Public", enrollment: "~17,500 undergrads", pattern: "stripes" },
+      charlotte: { nickname: "49ers", primary: "#005035", secondary: "#A49665", colorNames: "Charlotte Green & Gold", type: "Public", enrollment: "~24,000 undergrads", pattern: "solid" },
+      fau: { nickname: "Owls", primary: "#003366", secondary: "#CC0000", colorNames: "FAU Blue & Red", type: "Public", enrollment: "~24,500 undergrads", pattern: "stripes" },
+      uab: { nickname: "Blazers", primary: "#1E6B52", secondary: "#FFC845", colorNames: "Blazer Green & Gold", type: "Public", enrollment: "~13,500 undergrads", pattern: "solid" },
+      temple: { nickname: "Owls", primary: "#9D2235", secondary: "#FFFFFF", colorNames: "Cherry & White", type: "Public", enrollment: "~24,000 undergrads", pattern: "stripes" },
+      "ecu-aac": { nickname: "Pirates", primary: "#592A8A", secondary: "#FDC82F", colorNames: "Royal Purple & Old Gold", type: "Public", enrollment: "~21,500 undergrads", pattern: "hoops" },
+      rice: { nickname: "Owls", primary: "#00205B", secondary: "#C1C6C8", colorNames: "Rice Blue & Gray", type: "Private", enrollment: "~4,500 undergrads", pattern: "solid" },
+      unt: { nickname: "Mean Green", primary: "#00853E", secondary: "#FFFFFF", colorNames: "UNT Green & White", type: "Public", enrollment: "~34,000 undergrads", pattern: "solid" },
+      utsa: { nickname: "Roadrunners", primary: "#0C2340", secondary: "#F15A22", colorNames: "Navy Blue & Orange", type: "Public", enrollment: "~29,500 undergrads", pattern: "stripes" },
+
+      navy: { nickname: "Midshipmen", primary: "#00205B", secondary: "#C5B783", colorNames: "Navy Blue & Gold", type: "Federal Academy", enrollment: "~4,500 midshipmen", pattern: "sash" },
+      army: { nickname: "Black Knights", primary: "#000000", secondary: "#D4BF91", colorNames: "Black, Gold & Gray", type: "Federal Academy", enrollment: "~4,500 cadets", pattern: "stripes" },
+      airforce: { nickname: "Falcons", primary: "#003087", secondary: "#8A8D8F", colorNames: "Air Force Blue & Silver", type: "Federal Academy", enrollment: "~4,200 cadets", pattern: "sash" },
+      "airforce-mw": { nickname: "Falcons", primary: "#003087", secondary: "#8A8D8F", colorNames: "Air Force Blue & Silver", type: "Federal Academy", enrollment: "~4,200 cadets", pattern: "sash" },
+      marshall: { nickname: "Thundering Herd", primary: "#00B140", secondary: "#000000", colorNames: "Kelly Green & White", type: "Public", enrollment: "~8,500 undergrads", pattern: "stripes" },
+      slu: { nickname: "Billikens", primary: "#003DA5", secondary: "#FFFFFF", colorNames: "Billiken Blue & White", type: "Private", enrollment: "~8,200 undergrads", pattern: "stripes" },
+      akron: { nickname: "Zips", primary: "#041E42", secondary: "#A89968", colorNames: "Akron Blue & Gold", type: "Public", enrollment: "~11,500 undergrads", pattern: "sash" },
+      ucsb: { nickname: "Gauchos", primary: "#003660", secondary: "#FEBC11", colorNames: "Navy & Gold", type: "Public", enrollment: "~23,000 undergrads", pattern: "stripes" },
+      denver: { nickname: "Pioneers", primary: "#8B2332", secondary: "#8B6F4B", colorNames: "Crimson & Gold", type: "Private", enrollment: "~6,200 undergrads", pattern: "solid" },
+      vermont: { nickname: "Catamounts", primary: "#007155", secondary: "#FFD100", colorNames: "Vermont Green & Gold", type: "Public", enrollment: "~11,500 undergrads", pattern: "stripes" }
+    };
+
+    // Fallback Profile Generator so all 244 schools have accurate nicknames, colors & campus info
+    const FALLBACK_NICKNAMES = {
+      oregonstate: ["Beavers", "#DC4405", "#000000", "Beaver Orange & Black", "Public", "~28,500 undergrads"],
+      wsu: ["Cougars", "#981E32", "#5E6A71", "Crimson & Gray", "Public", "~23,000 undergrads"],
+      gonzaga: ["Bulldogs", "#041E42", "#C8102E", "Gonzaga Navy, Red & White", "Private", "~5,100 undergrads"],
+      "sdsu-pac12": ["Aztecs", "#A6192E", "#000000", "Scarlet & Black", "Public", "~33,000 undergrads"],
+      fresnostate: ["Bulldogs", "#DB0032", "#13284C", "Bulldog Red & Blue", "Public", "~21,500 undergrads"],
+      boisestate: ["Broncos", "#0033A0", "#D64309", "Boise Blue & Orange", "Public", "~22,500 undergrads"],
+      coloradostate: ["Rams", "#1E4D2B", "#C8C372", "Aggie Orange & Alfalfa Green", "Public", "~26,000 undergrads"],
+      utahstate: ["Aggies", "#0F2439", "#8A8D8F", "Aggie Blue & Pewter", "Public", "~24,500 undergrads"],
+      fiu: ["Panthers", "#081E3F", "#B6862C", "FIU Blue & Gold", "Public", "~45,000 undergrads"],
+      liberty: ["Flames", "#002D62", "#C41230", "Red, White & Blue", "Private", "~16,000 on-campus"],
+      delaware: ["Fightin' Blue Hens", "#00539F", "#FFD200", "Delaware Blue & Gold", "Public", "~19,000 undergrads"],
+      missouristate: ["Bears", "#5E0009", "#FFFFFF", "Maroon & White", "Public", "~19,500 undergrads"],
+      wku: ["Lady Toppers", "#C60C30", "#1E1E1E", "Red & White", "Public", "~14,500 undergrads"],
+      mtsu: ["Blue Raiders", "#0066CC", "#000000", "Royal Blue & White", "Public", "~18,000 undergrads"],
+      latech: ["Lady Techsters", "#002F8B", "#E31B23", "Blue & Red", "Public", "~9,500 undergrads"],
+      utep: ["Miners", "#FF8200", "#041E42", "UTEP Orange & Navy", "Public", "~20,500 undergrads"],
+      nmsu: ["Aggies", "#861F41", "#FFFFFF", "Crimson & White", "Public", "~11,500 undergrads"],
+      samhouston: ["Bearkats", "#F56423", "#FFFFFF", "Bearkat Orange & White", "Public", "~18,500 undergrads"],
+      jaxstate: ["Gamecocks", "#CC0000", "#FFFFFF", "Red & White", "Public", "~8,000 undergrads"],
+      kennesaw: ["Owls", "#FDBB30", "#0B1315", "KSU Gold & Black", "Public", "~40,000 undergrads"],
+      bu: ["Terriers", "#CC0000", "#FFFFFF", "Scarlet & White", "Private", "~18,500 undergrads"],
+      colgate: ["Raiders", "#821019", "#E10028", "Maroon & White", "Private", "~3,200 undergrads"],
+      lehigh: ["Mountain Hawks", "#653819", "#FFFFFF", "Brown & White", "Private", "~5,600 undergrads"],
+      bucknell: ["Bison", "#E87722", "#003865", "Orange & Blue", "Private", "~3,800 undergrads"],
+      loyolamd: ["Greyhounds", "#00694E", "#8A8D8F", "Evergreen & Grey", "Private", "~4,000 undergrads"],
+      american: ["Eagles", "#004FA2", "#E0263C", "Red, White & Blue", "Private", "~7,900 undergrads"],
+      holycross: ["Crusaders", "#602D89", "#FFFFFF", "Royal Purple & White", "Private", "~3,200 undergrads"],
+      lafayette: ["Leopards", "#910029", "#FFFFFF", "Maroon & White", "Private", "~2,700 undergrads"],
+      dayton: ["Flyers", "#CE1141", "#004B8D", "Red & Blue", "Private", "~8,400 undergrads"],
+      vcu: ["Rams", "#FFB300", "#000000", "Black & Gold", "Public", "~21,500 undergrads"],
+      duquesne: ["Dukes", "#041E42", "#BA0C2F", "Duquesne Blue & Red", "Private", "~5,200 undergrads"],
+      fordham: ["Rams", "#860038", "#FFFFFF", "Maroon & White", "Private", "~10,000 undergrads"],
+      uri: ["Rams", "#68ABE8", "#002147", "Keaney Blue & Navy", "Public", "~14,500 undergrads"],
+      gmu: ["Patriots", "#006633", "#FFCC33", "Mason Green & Gold", "Public", "~27,000 undergrads"],
+      gwu: ["Revolutionaries", "#033C5A", "#AA9868", "Buff & Blue", "Private", "~11,500 undergrads"],
+      davidson: ["Wildcats", "#AC1A2F", "#000000", "Red & Black", "Private", "~1,900 undergrads"],
+      lasalle: ["Explorers", "#003359", "#FFCC00", "Blue & Gold", "Private", "~3,200 undergrads"],
+      stjoes: ["Hawks", "#9E1B32", "#6C6F70", "Crimson & Gray", "Private", "~5,100 undergrads"],
+      stbonaventure: ["Bonnies", "#54261A", "#FDB913", "Brown & White", "Private", "~2,000 undergrads"],
+      richmond: ["Spiders", "#990000", "#00205B", "Red & Blue", "Private", "~3,100 undergrads"],
+      loyolachicago: ["Ramblers", "#922247", "#FEB727", "Maroon & Gold", "Private", "~11,800 undergrads"],
+      unh: ["Wildcats", "#001D5E", "#BBBDC0", "Blue & White", "Public", "~11,500 undergrads"],
+      umbc: ["Retrievers", "#000000", "#FDB515", "Black & Gold", "Public", "~10,800 undergrads"],
+      ualbany: ["Great Danes", "#46166B", "#EEB211", "Purple & Gold", "Public", "~12,000 undergrads"],
+      binghamton: ["Bearcats", "#005A43", "#000000", "Binghamton Green & Black", "Public", "~14,400 undergrads"],
+      umasslowell: ["River Hawks", "#0067B1", "#E31837", "Blue & Red", "Public", "~12,500 undergrads"],
+      njit: ["Highlanders", "#CC0000", "#071D49", "Red & Navy Blue", "Public", "~9,500 undergrads"],
+      bryant: ["Bulldogs", "#000000", "#B59A57", "Black & Gold", "Private", "~3,300 undergrads"],
+      maine: ["Black Bears", "#003263", "#B0D7FF", "Maine Blue & Light Blue", "Public", "~9,500 undergrads"],
+      lipscomb: ["Bisons", "#331E54", "#F4AA00", "Purple & Gold", "Private", "~3,000 undergrads"],
+      fgcu: ["Eagles", "#002D72", "#007749", "Cobalt Blue & Emerald Green", "Public", "~14,500 undergrads"],
+      stetson: ["Hatters", "#006747", "#FFFFFF", "Hatter Green & White", "Private", "~2,700 undergrads"],
+      jacksonville: ["Dolphins", "#004E42", "#FFFFFF", "Green & White", "Private", "~2,900 undergrads"],
+      unf: ["Ospreys", "#0A1E40", "#8A8D8F", "Navy Blue & Gray", "Public", "~14,000 undergrads"],
+      bellarmine: ["Knights", "#8B2332", "#B3B2B1", "Scarlet & Silver", "Private", "~2,400 undergrads"],
+      centralarkansas: ["Bears", "#4F2D7F", "#818A8F", "Purple & Gray", "Public", "~8,200 undergrads"],
+      queens: ["Royals", "#00205B", "#B3A369", "Royal Blue & Gold", "Private", "~1,600 undergrads"],
+      "eku-asun": ["Colonels", "#862633", "#FFFFFF", "Maroon & White", "Public", "~12,000 undergrads"],
+      apsu: ["Governors", "#C41E3A", "#FFFFFF", "Red & White", "Public", "~8,500 undergrads"],
+      una: ["Lions", "#46166B", "#DB9F11", "Purple & Gold", "Public", "~7,800 undergrads"],
+      westgeorgia: ["Wolves", "#0033A0", "#BA0C2F", "Blue & Red", "Public", "~9,500 undergrads"],
+      oakland: ["Golden Grizzlies", "#8E774D", "#000000", "Oakland Gold & Black", "Public", "~13,000 undergrads"],
+      milwaukee: ["Panthers", "#FFBD00", "#000000", "Black & Gold", "Public", "~18,000 undergrads"],
+      greenbay: ["Phoenix", "#006633", "#FFFFFF", "Green & White", "Public", "~8,500 undergrads"],
+      clevelandstate: ["Vikings", "#006A4D", "#FFFFFF", "Forest Green & White", "Public", "~11,000 undergrads"],
+      wrightstate: ["Raiders", "#026937", "#CEA052", "Hunter Green & Gold", "Public", "~8,200 undergrads"],
+      nku: ["Norse", "#FFC72C", "#000000", "Gold & Black", "Public", "~11,500 undergrads"],
+      detroitmercy: ["Titans", "#A6093D", "#002D72", "Titan Red, Blue & White", "Private", "~3,000 undergrads"],
+      iuindy: ["Jaguars", "#990000", "#F1BE48", "Crimson & Gold", "Public", "~18,000 undergrads"],
+      rmu: ["Colonials", "#14234B", "#A6192E", "Blue, Red & White", "Private", "~3,400 undergrads"],
+      purduefortwayne: ["Mastodons", "#CFB991", "#000000", "Old Gold & Black", "Public", "~6,800 undergrads"],
+      ysu: ["Penguins", "#C8102E", "#000000", "Red & White", "Public", "~9,500 undergrads"],
+      wmich: ["Broncos", "#6C4023", "#B5A167", "Brown & Gold", "Public", "~14,500 undergrads"],
+      bgsu: ["Falcons", "#FE5000", "#4F2C1D", "Orange & Brown", "Public", "~15,000 undergrads"],
+      niu: ["Huskies", "#BA0C2F", "#000000", "Cardinal & Black", "Public", "~11,500 undergrads"],
+      umass: ["Minutemen / Minutewomen", "#881C1C", "#FFFFFF", "Maroon & White", "Public", "~24,000 undergrads"],
+      buffalo: ["Bulls", "#005BBB", "#FFFFFF", "UB Blue & White", "Public", "~21,000 undergrads"],
+      kentstate: ["Golden Flashes", "#002664", "#EAAB00", "Navy Blue & Gold", "Public", "~21,000 undergrads"],
+      ohio: ["Bobcats", "#00694E", "#FFFFFF", "Cutler Green & White", "Public", "~21,500 undergrads"],
+      miamioh: ["RedHawks", "#B61E2E", "#000000", "Red & White", "Public", "~16,500 undergrads"],
+      ballstate: ["Cardinals", "#BA0C2F", "#000000", "Cardinal & White", "Public", "~15,000 undergrads"],
+      toledo: ["Rockets", "#15397F", "#FFDA00", "Midnight Blue & Gold", "Public", "~12,000 undergrads"],
+      emu: ["Eagles", "#046A38", "#FFFFFF", "EMU Green & White", "Public", "~11,000 undergrads"],
+      cmu: ["Chippewas", "#6A0032", "#FFC82E", "Maroon & Gold", "Public", "~10,500 undergrads"],
+      calpoly: ["Mustangs", "#154734", "#BD8B13", "Cal Poly Green & Gold", "Public", "~21,500 undergrads"],
+      uci: ["Anteaters", "#0064A4", "#FFD200", "UCI Blue & Gold", "Public", "~29,500 undergrads"],
+      csun: ["Matadors", "#D22030", "#000000", "Red, White & Black", "Public", "~32,000 undergrads"],
+      fullerton: ["Titans", "#00244E", "#FF7900", "Navy, Orange & White", "Public", "~36,000 undergrads"],
+      ucdavis: ["Aggies", "#022851", "#FFBF00", "Aggie Blue & Gold", "Public", "~31,500 undergrads"],
+      ucr: ["Highlanders", "#003DA5", "#FFB81C", "UCR Blue & Gold", "Public", "~22,500 undergrads"],
+      longbeach: ["The Beach", "#000000", "#F2A900", "Black & Gold", "Public", "~34,000 undergrads"],
+      hawaii: ["Rainbow Wahine", "#024731", "#000000", "Green, Black & White", "Public", "~14,500 undergrads"],
+      csub: ["Roadrunners", "#003594", "#FFC72C", "Blue & Gold", "Public", "~8,500 undergrads"],
+      ucsd: ["Tritons", "#182B49", "#C69214", "Navy & Gold", "Public", "~33,500 undergrads"],
+      sacstate: ["Hornets", "#043927", "#C4B581", "Sac State Green & Gold", "Public", "~28,000 undergrads"],
+      drake: ["Bulldogs", "#004477", "#999999", "Drake Blue & White", "Private", "~2,900 undergrads"],
+      bradley: ["Braves", "#A50000", "#FFFFFF", "Red & White", "Private", "~4,200 undergrads"],
+      evansville: ["Purple Aces", "#522398", "#F26522", "Purple, Orange & White", "Private", "~1,800 undergrads"],
+      uic: ["Flames", "#001E62", "#D50032", "Navy Blue & Fire Engine Red", "Public", "~22,000 undergrads"],
+      belmont: ["Bruins", "#002469", "#C9262C", "Navy Blue, Red & White", "Private", "~7,300 undergrads"],
+      valpo: ["Beacons", "#381E0E", "#FFCC00", "Brown & Gold", "Private", "~2,300 undergrads"],
+      isu: ["Redbirds", "#CE1126", "#000000", "Red & White", "Public", "~18,000 undergrads"],
+      indstate: ["Sycamores", "#0142BC", "#FFFFFF", "Sycamore Blue & White", "Public", "~7,200 undergrads"],
+      uni: ["Panthers", "#4B116F", "#FFCC00", "Purple & Old Gold", "Public", "~8,000 undergrads"],
+      siu: ["Salukis", "#720000", "#FFFFFF", "Maroon & White", "Public", "~8,500 undergrads"],
+      murraystate: ["Racers", "#002144", "#ECAC00", "Navy & Gold", "Public", "~8,000 undergrads"],
+      uncw: ["Seahawks", "#006666", "#FFD700", "Teal, Gold & Navy", "Public", "~14,500 undergrads"],
+      hofstra: ["Pride", "#003594", "#FDC82F", "Hofstra Blue & Gold", "Private", "~6,100 undergrads"],
+      elon: ["Phoenix", "#73000A", "#B59A57", "Maroon & Gold", "Private", "~6,400 undergrads"],
+      williammary: ["Tribe", "#115740", "#B9975B", "Green & Gold", "Public", "~6,800 undergrads"],
+      drexel: ["Dragons", "#07294D", "#FFC600", "Drexel Blue & Gold", "Private", "~13,500 undergrads"],
+      northeastern: ["Huskies", "#C8102E", "#000000", "Red & Black", "Private", "~16,000 undergrads"],
+      monmouth: ["Hawks", "#041E42", "#53565A", "Midnight Blue & White", "Private", "~3,900 undergrads"],
+      campbell: ["Fighting Camels", "#FF671F", "#000000", "Orange & Black", "Private", "~3,200 undergrads"],
+      stonybrook: ["Seawolves", "#990000", "#16243E", "Red & Navy", "Public", "~18,000 undergrads"],
+      charleston: ["Cougars", "#7A2531", "#D8C9A7", "Maroon & White", "Public", "~10,000 undergrads"],
+      towson: ["Tigers", "#FFBB00", "#000000", "Gold & Black", "Public", "~16,500 undergrads"],
+      hampton: ["Pirates", "#0067AC", "#FFFFFF", "Reflex Blue & White", "Private", "~3,200 undergrads"],
+      quinnipiac: ["Bobcats", "#041E42", "#FFB81C", "Navy & Gold", "Private", "~6,100 undergrads"],
+      iona: ["Gaels", "#6F2C3F", "#F2A900", "Maroon & Gold", "Private", "~3,100 undergrads"],
+      rider: ["Broncs", "#981E32", "#6C6F70", "Cranberry & Gray", "Private", "~3,100 undergrads"],
+      fairfield: ["Stags", "#C8102E", "#FFFFFF", "Cardinal Red & White", "Private", "~4,800 undergrads"],
+      siena: ["Saints", "#006747", "#FCC917", "Siena Green & Gold", "Private", "~3,400 undergrads"],
+      marist: ["Red Foxes", "#C8102E", "#FFFFFF", "Red & White", "Private", "~5,400 undergrads"],
+      niagara: ["Purple Eagles", "#582C83", "#FFFFFF", "Purple & White", "Private", "~2,500 undergrads"],
+      canisius: ["Golden Griffins", "#002E62", "#FFBA00", "Canisius Blue & Gold", "Private", "~1,800 undergrads"],
+      manhattan: ["Jaspers", "#00703C", "#FFFFFF", "Kelly Green & White", "Private", "~3,000 undergrads"],
+      mountstmarys: ["Mountaineers", "#002F6C", "#FFFFFF", "Mount Blue & White", "Private", "~1,800 undergrads"],
+      sacredheart: ["Pioneers", "#CE1141", "#FFFFFF", "Scarlet & White", "Private", "~6,800 undergrads"],
+      merrimack: ["Warriors", "#003768", "#FDB913", "Navy Blue & Gold", "Private", "~4,200 undergrads"],
+      saintpeters: ["Peacocks", "#004C97", "#FFFFFF", "Peacock Blue & White", "Private", "~2,200 undergrads"],
+      utrgv: ["Vaqueros", "#F05023", "#006A4E", "Orange, Green & Navy", "Public", "~27,000 undergrads"],
+      gcu: ["Lopes", "#522398", "#000000", "Purple, Black & White", "Private", "~25,000 on-campus"],
+      utahtech: ["Trailblazers", "#BA1C21", "#003058", "Brooks Red & Rock Navy", "Public", "~12,000 undergrads"],
+      cbu: ["Lancers", "#002554", "#A37400", "Navy Blue & Gold", "Private", "~8,500 undergrads"],
+      uvu: ["Wolverines", "#275D38", "#000000", "UVU Green & White", "Public", "~41,000 undergrads"],
+      unlv: ["Rebels", "#CF0A2C", "#CAC8C8", "Scarlet & Gray", "Public", "~25,500 undergrads"],
+      "unlv-mw": ["Rebels", "#CF0A2C", "#CAC8C8", "Scarlet & Gray", "Public", "~25,500 undergrads"],
+      sjsu: ["Spartans", "#0055A2", "#E5A823", "SJSU Blue & Gold", "Public", "~27,500 undergrads"],
+      "sjsu-mw": ["Spartans", "#0055A2", "#E5A823", "SJSU Blue & Gold", "Public", "~27,500 undergrads"],
+      acu: ["Wildcats", "#4F2D7F", "#FFFFFF", "Purple & White", "Private", "~3,700 undergrads"],
+      suu: ["Thunderbirds", "#C41425", "#000000", "Scarlet & Black", "Public", "~13,000 undergrads"],
+      tarleton: ["Texans", "#4F2D7F", "#FFFFFF", "Purple & White", "Public", "~14,000 undergrads"],
+      hcu: ["Huskies", "#00539B", "#F26522", "HCU Blue & Orange", "Private", "~2,800 undergrads"],
+      uiw: ["Cardinals", "#CB333B", "#000000", "Red & Black", "Private", "~4,500 undergrads"],
+      sfa: ["Ladyjacks", "#393996", "#FFFFFF", "Purple & White", "Public", "~9,500 undergrads"],
+      lamar: ["Cardinals", "#E31937", "#000000", "Red & White", "Public", "~9,500 undergrads"],
+      mcneese: ["Cowgirls", "#00529B", "#FFD204", "McNeese Blue & Gold", "Public", "~5,500 undergrads"],
+      tamucc: ["Islanders", "#0067C5", "#007F3E", "Island Blue & Green", "Public", "~8,500 undergrads"],
+      southeastern: ["Lady Lions", "#215732", "#EAAA00", "Green & Gold", "Public", "~12,500 undergrads"],
+      nicholls: ["Colonels", "#A6192E", "#7C878E", "Red & Gray", "Public", "~5,500 undergrads"],
+      northwesternstate: ["Lady Demons", "#4F2D7F", "#F26522", "Purple & White", "Public", "~7,500 undergrads"],
+      easttexasam: ["Lions", "#003262", "#FDB515", "Blue & Gold", "Public", "~8,000 undergrads"],
+      wvup: ["Chanticleers", "#006F71", "#A27752", "Teal & Bronze", "Public", "~10,000 undergrads"],
+      gsu: ["Panthers", "#0039A6", "#CC0000", "Blue & White", "Public", "~28,500 undergrads"],
+      georgiasouthern: ["Eagles", "#041E42", "#87714D", "Blue & White", "Public", "~22,500 undergrads"],
+      olddominion: ["Monarchs", "#003057", "#7C878E", "Hudson Blue & Silver", "Public", "~18,500 undergrads"],
+      jmu: ["Dukes", "#450084", "#CBB677", "JMU Purple & Gold", "Public", "~20,500 undergrads"],
+      southalabama: ["Jaguars", "#00205B", "#BF0D3E", "Blue, Red & White", "Public", "~9,500 undergrads"],
+      appstate: ["Mountaineers", "#FFCC00", "#000000", "Black & Gold", "Public", "~19,000 undergrads"],
+      txstate: ["Bobcats", "#501214", "#8D734A", "Maroon & Gold", "Public", "~34,000 undergrads"],
+      arkansasstate: ["Red Wolves", "#CC092F", "#000000", "Scarlet & Black", "Public", "~9,500 undergrads"],
+      louisiana: ["Ragin' Cajuns", "#CE181E", "#FFFFFF", "Vermilion & White", "Public", "~13,000 undergrads"],
+      ulm: ["Warhawks", "#840029", "#FDB913", "Maroon & Gold", "Public", "~6,500 undergrads"],
+      southernmiss: ["Golden Eagles", "#FFAB00", "#000000", "Black & Gold", "Public", "~10,500 undergrads"],
+      troy: ["Trojans", "#8A2432", "#A7A8AA", "Cardinal, Silver & Black", "Public", "~11,000 undergrads"],
+      omaha: ["Mavericks", "#D71920", "#000000", "Crimson & Black", "Public", "~12,000 undergrads"],
+      stthomas: ["Tommies", "#510C76", "#9E9E9E", "Purple & Gray", "Private", "~6,000 undergrads"],
+      und: ["Fighting Hawks", "#009A44", "#000000", "Kelly Green & White", "Public", "~10,500 undergrads"],
+      sdsu: ["Jackrabbits", "#0033A0", "#FFD100", "Yellow & Blue", "Public", "~9,500 undergrads"],
+      usd: ["Coyotes", "#AD0000", "#FFFFFF", "Red & White", "Public", "~7,500 undergrads"],
+      ndsu: ["Bison", "#0A5640", "#FFC72A", "Yellow & Green", "Public", "~10,000 undergrads"],
+      oralroberts: ["Golden Eagles", "#002F6C", "#C5B358", "Navy Blue & Vegas Gold", "Private", "~4,500 undergrads"],
+      umkc: ["Roos", "#0066CC", "#FFD200", "KC Blue & Gold", "Public", "~11,000 undergrads"],
+      siue: ["Cougars", "#CC0000", "#000000", "Red & White", "Public", "~9,500 undergrads"],
+      lindenwood: ["Lions", "#000000", "#B5A36A", "Black & Gold", "Private", "~4,800 undergrads"],
+      easternillinois: ["Panthers", "#004B83", "#8A8D8F", "EIU Blue & Gray", "Public", "~6,500 undergrads"],
+      westernillinois: ["Leathernecks", "#663399", "#FFCC00", "Purple & Gold", "Public", "~5,500 undergrads"],
+      southernindiana: ["Screaming Eagles", "#CF102D", "#002856", "Red, White & Blue", "Public", "~7,500 undergrads"],
+      littlerock: ["Trojans", "#6E2639", "#A7A9AC", "Maroon & Silver", "Public", "~6,500 undergrads"],
+      southeastmissouri: ["Redhawks", "#C8102E", "#000000", "Red & Black", "Public", "~8,500 undergrads"],
+      moreheadstate: ["Eagles", "#005DAA", "#FFCC00", "Blue & Gold", "Public", "~7,500 undergrads"],
+      tennesseetech: ["Golden Eagles", "#4F2D7F", "#FFDD00", "Purple & Gold", "Public", "~8,800 undergrads"],
+      utmartin: ["Skyhawks", "#002649", "#FF671F", "Navy Blue & Orange", "Public", "~5,800 undergrads"],
+      fdu: ["Knights", "#72293C", "#002B5C", "Burgundy & Blue", "Private", "~7,500 undergrads"],
+      liu: ["Sharks", "#69B3E7", "#FFC72C", "LIU Blue & Gold", "Private", "~11,000 undergrads"],
+      ccsu: ["Blue Devils", "#1B49A2", "#FFFFFF", "Blue & White", "Public", "~7,800 undergrads"],
+      stfrancispa: ["Red Flash", "#BD1E2D", "#FFFFFF", "Red & White", "Private", "~1,800 undergrads"],
+      stonehill: ["Skyhawks", "#2E1A47", "#FFFFFF", "Purple & White", "Private", "~2,500 undergrads"],
+      lemoyne: ["Dolphins", "#007A33", "#FFD100", "Green & Gold", "Private", "~2,600 undergrads"],
+      howard: ["Bison", "#003A63", "#E51937", "Howard Blue & Red", "Private", "~10,000 undergrads"],
+      chicagostate: ["Cougars", "#006633", "#000000", "Green & White", "Public", "~1,800 undergrads"],
+      wagner: ["Seahawks", "#004331", "#FFFFFF", "Wagner Green & White", "Private", "~1,600 undergrads"],
+      mercyhurst: ["Lakers", "#006F44", "#002855", "Green & Navy Blue", "Private", "~2,400 undergrads"],
+      newhaven: ["Chargers", "#003087", "#FDB913", "Blue & Gold", "Private", "~5,200 undergrads"],
+      delawarestate: ["Hornets", "#EE2737", "#009CDE", "Columbia Blue & Red", "Public", "~5,200 undergrads"],
+      scstate: ["Lady Bulldogs", "#7D110C", "#003366", "Garnet & Blue", "Public", "~2,600 undergrads"],
+      norfolkstate: ["Spartans", "#007A53", "#F2A900", "Green & Gold", "Public", "~5,400 undergrads"],
+      coppinstate: ["Eagles", "#002D72", "#FDB913", "Navy Blue & Gold", "Public", "~1,800 undergrads"],
+      morganstate: ["Lady Bears", "#014786", "#F47937", "Blue & Orange", "Public", "~8,200 undergrads"],
+      umes: ["Hawks", "#6F263D", "#8A8D8F", "Maroon & Gray", "Public", "~2,400 undergrads"],
+      furman: ["Paladins", "#582C83", "#FFFFFF", "Purple & White", "Private", "~2,300 undergrads"],
+      uncg: ["Spartans", "#0F2044", "#FFB71B", "Navy, Gold & White", "Public", "~14,500 undergrads"],
+      mercer: ["Bears", "#F76800", "#000000", "Orange & Black", "Private", "~4,900 undergrads"],
+      etsu: ["Buccaneers", "#041E42", "#FFC72C", "Navy Blue & Old Gold", "Public", "~11,000 undergrads"],
+      wofford: ["Terriers", "#886E4C", "#000000", "Old Gold & Black", "Private", "~1,800 undergrads"],
+      samford: ["Bulldogs", "#0C2340", "#BD1F2D", "Red & Blue", "Private", "~3,800 undergrads"],
+      vmi: ["Keydets", "#AE122A", "#FFD619", "Red, Yellow & White", "Public Military", "~1,500 cadets"],
+      westerncarolina: ["Catamounts", "#592C88", "#C1A875", "Purple & Gold", "Public", "~9,500 undergrads"],
+      chattanooga: ["Mocs", "#00386B", "#E0AA0F", "Navy & Old Gold", "Public", "~10,000 undergrads"],
+      citadel: ["Bulldogs", "#3975B7", "#FFFFFF", "Citadel Blue & White", "Public Military", "~2,300 cadets"],
+      highpoint: ["Panthers", "#330072", "#FFFFFF", "High Point Purple & White", "Private", "~5,100 undergrads"],
+      radford: ["Highlanders", "#C2011B", "#002B49", "Red, Blue & Gray", "Public", "~6,200 undergrads"],
+      winthrop: ["Eagles", "#660000", "#F0B323", "Garnet & Gold", "Public", "~4,000 undergrads"],
+      gardnerwebb: ["Runnin' Bulldogs", "#BF2F37", "#000000", "Red & Black", "Private", "~2,100 undergrads"],
+      longwood: ["Lancers", "#003273", "#FFFFFF", "Longwood Blue & White", "Public", "~3,600 undergrads"],
+      presbyterian: ["Blue Hose", "#0060A9", "#9D2235", "Blue & Garnet", "Private", "~1,100 undergrads"],
+      uscupstate: ["Spartans", "#008542", "#000000", "Green, White & Black", "Public", "~4,500 undergrads"],
+      uncasheville: ["Bulldogs", "#003DA5", "#FFFFFF", "Royal Blue & White", "Public", "~2,900 undergrads"],
+      charlestonsouthern: ["Buccaneers", "#002855", "#A89968", "Navy Blue & Vegas Gold", "Private", "~2,900 undergrads"],
+      newmexico: ["Lobos", "#BA0C2F", "#63666A", "Cherry & Silver", "Public", "~16,500 undergrads"],
+      wyoming: ["Cowgirls", "#492F24", "#FFC425", "Brown & Gold", "Public", "~8,500 undergrads"],
+      nevada: ["Wolf Pack", "#003366", "#807F84", "Navy Blue & Silver", "Public", "~17,500 undergrads"],
+      coloradocollege: ["Tigers", "#000000", "#F2A900", "Black & Gold", "Private", "~2,200 undergrads"],
+      northernarizona: ["Lumberjacks", "#002454", "#FAC01A", "True Blue & Gold", "Public", "~24,000 undergrads"],
+      montana: ["Grizzlies", "#660033", "#999999", "Maroon & Silver", "Public", "~7,800 undergrads"],
+      weberstate: ["Wildcats", "#492365", "#FFFFFF", "Royal Purple & White", "Public", "~26,000 undergrads"],
+      idahostate: ["Bengals", "#F47920", "#000000", "Orange & Black", "Public", "~10,000 undergrads"],
+      idaho: ["Vandals", "#B3A369", "#000000", "Silver & Vandal Gold", "Public", "~9,200 undergrads"],
+      easternwashington: ["Eagles", "#A10022", "#FFFFFF", "Red & White", "Public", "~8,500 undergrads"],
+      portlandstate: ["Vikings", "#154734", "#FFFFFF", "PSU Green & White", "Public", "~17,000 undergrads"],
+      northerncolorado: ["Bears", "#013C65", "#F6B000", "Blue & Gold", "Public", "~6,800 undergrads"],
+      grambling: ["Lady Tigers", "#000000", "#ECAA00", "Black & Gold", "Public", "~4,300 undergrads"],
+      pvamu: ["Lady Panthers", "#4F2D7F", "#FFCC00", "Purple & Gold", "Public", "~8,500 undergrads"],
+      jacksonstate: ["Lady Tigers", "#002147", "#FFFFFF", "Navy Blue & White", "Public", "~5,200 undergrads"],
+      alabamastate: ["Lady Hornets", "#000000", "#C99700", "Black & Old Gold", "Public", "~3,500 undergrads"],
+      southernu: ["Lady Jaguars", "#004B87", "#F2A900", "Columbia Blue & Gold", "Public", "~6,800 undergrads"],
+      texassouthern: ["Lady Tigers", "#6F263D", "#A7A8AA", "Maroon & Gray", "Public", "~6,800 undergrads"],
+      alabamaam: ["Lady Bulldogs", "#660000", "#FFFFFF", "Maroon & White", "Public", "~5,600 undergrads"],
+      alcornstate: ["Lady Braves", "#46166B", "#EAAA00", "Purple & Gold", "Public", "~2,500 undergrads"],
+      uapb: ["Golden Lions", "#000000", "#EEB211", "Black & Gold", "Public", "~2,100 undergrads"],
+      mvsu: ["Devilettes", "#00533E", "#C8102E", "Forest Green & White", "Public", "~1,800 undergrads"]
+    };
+
+    function getSchoolProfile(program) {
+      if (SCHOOL_PROFILES[program.id]) {
+        return SCHOOL_PROFILES[program.id];
+      }
+      const fb = FALLBACK_NICKNAMES[program.id];
+      if (fb) {
+        return {
+          nickname: fb[0],
+          primary: fb[1],
+          secondary: fb[2],
+          colorNames: fb[3],
+          type: fb[4],
+          enrollment: fb[5],
+          pattern: "stripes"
+        };
+      }
+      return {
+        nickname: "Varsity Soccer",
+        primary: "#0369a1",
+        secondary: "#e0effe",
+        colorNames: "Blue & White",
+        type: "Division I University",
+        enrollment: "NCAA D1",
+        pattern: "solid"
+      };
+    }
+
+    // Helper to determine legible text color on top of any hex background
+    function getContrastColor(hex) {
+      const clean = hex.replace('#', '');
+      const r = parseInt(clean.substring(0, 2), 16);
+      const g = parseInt(clean.substring(2, 4), 16);
+      const b = parseInt(clean.substring(4, 6), 16);
+      const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      return yiq >= 155 ? '#0f172a' : '#ffffff';
+    }
+
+    // Generate Realistic Custom SVG Soccer Jersey Replica (Home & Away Kits)
+    function createJerseySVG(program, profile, kitType = 'HOME') {
+      const isHome = kitType === 'HOME';
+      const baseColor = isHome ? profile.primary : '#FFFFFF';
+      const accentColor = isHome
+        ? (profile.secondary.toUpperCase() === '#FFFFFF' ? '#E2E8F0' : profile.secondary)
+        : profile.primary;
+      const trimColor = isHome ? profile.secondary : profile.primary;
+      const numberColor = getContrastColor(baseColor);
+      const clipId = `jersey-clip-${program.id}-${kitType}`;
+
+      let patternMarkup = '';
+      if (profile.pattern === 'stripes') {
+        patternMarkup = `
+          <rect x="64" y="25" width="14" height="175" fill="${accentColor}" opacity="${isHome ? '0.88' : '0.22'}" />
+          <rect x="93" y="25" width="14" height="175" fill="${accentColor}" opacity="${isHome ? '0.88' : '0.22'}" />
+          <rect x="122" y="25" width="14" height="175" fill="${accentColor}" opacity="${isHome ? '0.88' : '0.22'}" />
+        `;
+      } else if (profile.pattern === 'hoops') {
+        patternMarkup = `
+          <rect x="45" y="72" width="110" height="16" fill="${accentColor}" opacity="${isHome ? '0.9' : '0.25'}" />
+          <rect x="45" y="108" width="110" height="16" fill="${accentColor}" opacity="${isHome ? '0.9' : '0.25'}" />
+          <rect x="45" y="144" width="110" height="16" fill="${accentColor}" opacity="${isHome ? '0.9' : '0.25'}" />
+        `;
+      } else if (profile.pattern === 'sash') {
+        patternMarkup = `
+          <polygon points="48,30 74,30 155,188 129,188" fill="${accentColor}" opacity="${isHome ? '0.92' : '0.85'}" />
+        `;
+      } else {
+        patternMarkup = `
+          <rect x="52" y="25" width="6" height="175" fill="${accentColor}" opacity="0.45" />
+          <rect x="142" y="25" width="6" height="175" fill="${accentColor}" opacity="0.45" />
+        `;
+      }
+
+      const shortCode = program.conference.slice(0, 4).toUpperCase();
+
+      return `
+        <div class="bg-white rounded-2xl p-3.5 border border-brand-100 flex flex-col items-center text-center shadow-2xs">
+          <svg viewBox="0 0 200 205" class="w-32 h-32 drop-shadow-sm" aria-label="${program.name} ${kitType} soccer jersey replica">
+            <defs>
+              <clipPath id="${clipId}">
+                <path d="M68,26 L36,42 L14,82 L38,96 L52,72 L52,188 L148,188 L148,72 L162,96 L186,82 L164,42 L132,26 Q100,42 68,26 Z" />
+              </clipPath>
+            </defs>
+
+            <!-- Jersey Base Silhouette -->
+            <path d="M68,26 L36,42 L14,82 L38,96 L52,72 L52,188 L148,188 L148,72 L162,96 L186,82 L164,42 L132,26 Q100,42 68,26 Z"
+                  fill="${baseColor}" stroke="#CBD5E1" stroke-width="2.5" stroke-linejoin="round" />
+
+            <!-- Clipped Kit Pattern -->
+            <g clip-path="url(#${clipId})">
+              ${patternMarkup}
+              <!-- Sleeve Cuffs -->
+              <rect x="10" y="75" width="38" height="10" transform="rotate(28 24 80)" fill="${trimColor}" />
+              <rect x="152" y="75" width="38" height="10" transform="rotate(-28 176 80)" fill="${trimColor}" />
+              <!-- Subtle Fabric Shading -->
+              <rect x="52" y="25" width="96" height="165" fill="url(#shade)" opacity="0.06" />
+            </g>
+
+            <!-- V-Neck Collar Trim -->
+            <path d="M68,26 Q100,48 132,26 L124,23 Q100,39 76,23 Z" fill="${trimColor}" />
+
+            <!-- Left Chest School Crest -->
+            <circle cx="123" cy="68" r="9.5" fill="${trimColor}" stroke="#FFFFFF" stroke-width="1.5" />
+            <text x="123" y="71" text-anchor="middle" font-size="6.5" font-weight="900" fill="${getContrastColor(trimColor)}">D1</text>
+
+            <!-- Front Kit Number -->
+            <text x="100" y="132" text-anchor="middle" font-size="40" font-weight="900" font-family="Inter, sans-serif"
+                  fill="${numberColor}" stroke="${baseColor}" stroke-width="4" paint-order="stroke">10</text>
+
+            <!-- Bottom Hem Jock Tag -->
+            <rect x="60" y="175" width="22" height="7" rx="2" fill="${trimColor}" opacity="0.9" />
+            <text x="71" y="180.5" text-anchor="middle" font-size="4.5" font-weight="800" fill="${getContrastColor(trimColor)}">${shortCode}</text>
+          </svg>
+          <span class="mt-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-700">
+            ${isHome ? 'Primary Home Kit' : 'Secondary Away Kit'}
+          </span>
+        </div>
+      `;
+    }
 
     // Helper to render 5-star icons
     function renderStarRating(rating) {
@@ -656,19 +1252,22 @@
 
     // State Variables
     const SHORTLIST_STORAGE_KEY = 'pitch_map_recruit_shortlist_v1';
+    const NOTES_STORAGE_KEY = 'pitch_map_recruit_notes_v1';
     let currentGender = 'ALL';
     let currentState = 'ALL';
     let currentSearch = '';
     let currentSort = 'RATING';
     let onlyShortlist = false;
-    let shortlistIds = new Set(loadShortlist());
+    let shortlistIds = new Set(loadJSONStorage(SHORTLIST_STORAGE_KEY, []));
+    let recruitNotes = loadJSONStorage(NOTES_STORAGE_KEY, {});
+    let activeModalProgramId = null;
 
-    function loadShortlist() {
+    function loadJSONStorage(key, fallback) {
       try {
-        const saved = localStorage.getItem(SHORTLIST_STORAGE_KEY);
-        return saved ? JSON.parse(saved) : [];
+        const saved = localStorage.getItem(key);
+        return saved ? JSON.parse(saved) : fallback;
       } catch (e) {
-        return [];
+        return fallback;
       }
     }
 
@@ -681,7 +1280,16 @@
       updateShortlistUI();
     }
 
-    function toggleShortlist(programId) {
+    function saveNotes() {
+      try {
+        localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(recruitNotes));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    function toggleShortlist(programId, event) {
+      if (event) event.stopPropagation();
       if (shortlistIds.has(programId)) {
         shortlistIds.delete(programId);
       } else {
@@ -689,6 +1297,9 @@
       }
       saveShortlist();
       renderDashboard();
+      if (activeModalProgramId === programId) {
+        updateModalShortlistButton(programId);
+      }
     }
 
     function updateShortlistUI() {
@@ -708,6 +1319,145 @@
         filterBtn.querySelector('i').classList.add('text-rose-500');
         filterBtn.querySelector('i').classList.remove('text-white');
       }
+    }
+
+    // Open School Detail & Jersey Replica Modal
+    function openProgramModal(programId) {
+      const program = D1_SOCCER_PROGRAMS.find(p => p.id === programId);
+      if (!program) return;
+
+      activeModalProgramId = programId;
+      const profile = getSchoolProfile(program);
+      const modal = document.getElementById('program-modal');
+      const banner = document.getElementById('modal-banner');
+
+      // Style header banner with school primary color
+      banner.style.background = `linear-gradient(135deg, ${profile.primary} 0%, #0f172a 140%)`;
+
+      document.getElementById('modal-conf-badge').textContent = program.conference;
+      document.getElementById('modal-type-badge').textContent = `${profile.type} • ${profile.enrollment}`;
+      document.getElementById('modal-school-name').textContent = program.name;
+      document.getElementById('modal-nickname-location').innerHTML = `
+        <span class="bg-white/20 px-2 py-0.5 rounded-md font-extrabold text-white"><i class="fa-solid fa-shield-halved mr-1"></i>${profile.nickname}</span>
+        <span>•</span>
+        <span><i class="fa-solid fa-location-dot mr-1"></i>${program.city}, ${program.state}</span>
+      `;
+
+      // Official Color Swatches
+      document.getElementById('modal-color-swatches').innerHTML = `
+        <span class="inline-flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-brand-100">
+          <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" style="background-color: ${profile.primary}"></span>
+          <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" style="background-color: ${profile.secondary}"></span>
+          <span>${profile.colorNames}</span>
+        </span>
+      `;
+
+      // Home & Away Jersey Replicas
+      document.getElementById('modal-jerseys-container').innerHTML = `
+        ${createJerseySVG(program, profile, 'HOME')}
+        ${createJerseySVG(program, profile, 'AWAY')}
+      `;
+
+      // Quick Facts
+      document.getElementById('modal-stadium').textContent = program.stadium;
+      document.getElementById('modal-stadium-meta').textContent = `${program.capacity.toLocaleString()} seats • ${program.surface}`;
+      document.getElementById('modal-conf-rating').innerHTML = renderStarRating(CONFERENCE_RATINGS[program.conference]);
+      document.getElementById('modal-sponsors').textContent = program.mens && program.womens
+        ? "Sponsors Men's & Women's"
+        : (program.mens ? "Men's Soccer Only" : "Women's Soccer Only");
+      document.getElementById('modal-campus-type').textContent = `${profile.type} Institution`;
+      document.getElementById('modal-enrollment').textContent = profile.enrollment;
+
+      // Detailed Postseason Cards
+      const statsContainer = document.getElementById('modal-stats-container');
+      statsContainer.innerHTML = '';
+
+      if (program.mens && program.mensStats) {
+        statsContainer.innerHTML += `
+          <div class="bg-sky-50/70 rounded-2xl p-4 border border-sky-200/80 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black uppercase tracking-wider text-sky-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-mars text-sky-600"></i> Men's Soccer
+              </span>
+              ${program.mensStats.ncaaTitles > 0 ? `<span class="bg-amber-100 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-md"><i class="fa-solid fa-trophy text-amber-500 mr-1"></i>${program.mensStats.ncaaTitles} National Title${program.mensStats.ncaaTitles > 1 ? 's' : ''}</span>` : ''}
+            </div>
+            <div class="grid grid-cols-3 gap-2 pt-1 text-center">
+              <div class="bg-white rounded-xl p-2 border border-sky-100">
+                <div class="text-base font-black text-slate-900">${program.mensStats.confTitles}</div>
+                <div class="text-[10px] text-slate-500 font-semibold">Conf. Titles</div>
+              </div>
+              <div class="bg-white rounded-xl p-2 border border-sky-100">
+                <div class="text-base font-black text-slate-900">${program.mensStats.ncaaApps}</div>
+                <div class="text-[10px] text-slate-500 font-semibold">NCAA Apps</div>
+              </div>
+              <div class="bg-white rounded-xl p-2 border border-sky-100">
+                <div class="text-base font-black text-amber-600">${program.mensStats.ncaaTitles}</div>
+                <div class="text-[10px] text-slate-500 font-semibold">NCAA Titles</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (program.womens && program.womensStats) {
+        statsContainer.innerHTML += `
+          <div class="bg-indigo-50/70 rounded-2xl p-4 border border-indigo-200/80 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black uppercase tracking-wider text-indigo-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-venus text-indigo-600"></i> Women's Soccer
+              </span>
+              ${program.womensStats.ncaaTitles > 0 ? `<span class="bg-amber-100 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-md"><i class="fa-solid fa-trophy text-amber-500 mr-1"></i>${program.womensStats.ncaaTitles} National Title${program.womensStats.ncaaTitles > 1 ? 's' : ''}</span>` : ''}
+            </div>
+            <div class="grid grid-cols-3 gap-2 pt-1 text-center">
+              <div class="bg-white rounded-xl p-2 border border-indigo-100">
+                <div class="text-base font-black text-slate-900">${program.womensStats.confTitles}</div>
+                <div class="text-[10px] text-slate-500 font-semibold">Conf. Titles</div>
+              </div>
+              <div class="bg-white rounded-xl p-2 border border-indigo-100">
+                <div class="text-base font-black text-slate-900">${program.womensStats.ncaaApps}</div>
+                <div class="text-[10px] text-slate-500 font-semibold">NCAA Apps</div>
+              </div>
+              <div class="bg-white rounded-xl p-2 border border-indigo-100">
+                <div class="text-base font-black text-amber-600">${program.womensStats.ncaaTitles}</div>
+                <div class="text-[10px] text-slate-500 font-semibold">NCAA Titles</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Recruit Notes
+      const notesEl = document.getElementById('modal-recruit-notes');
+      notesEl.value = recruitNotes[programId] || '';
+      document.getElementById('modal-note-status').classList.add('opacity-0');
+
+      updateModalShortlistButton(programId);
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function updateModalShortlistButton(programId) {
+      const btn = document.getElementById('modal-shortlist-btn');
+      const isSaved = shortlistIds.has(programId);
+      if (isSaved) {
+        btn.classList.remove('bg-white/15', 'text-white');
+        btn.classList.add('bg-rose-500', 'text-white', 'border-rose-400');
+        btn.innerHTML = '<i class="fa-solid fa-heart text-base"></i>';
+      } else {
+        btn.classList.add('bg-white/15', 'text-white');
+        btn.classList.remove('bg-rose-500', 'border-rose-400');
+        btn.innerHTML = '<i class="fa-regular fa-heart text-base"></i>';
+      }
+    }
+
+    function closeProgramModal() {
+      const modal = document.getElementById('program-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+      activeModalProgramId = null;
     }
 
     // DOM Elements
@@ -759,6 +1509,36 @@
       document.getElementById('btn-gender-women').addEventListener('click', (e) => setGenderFilter('WOMEN', e.target));
 
       resetFiltersBtn.addEventListener('click', resetFilters);
+
+      // Modal Controls
+      document.getElementById('modal-close-btn').addEventListener('click', closeProgramModal);
+      document.getElementById('modal-shortlist-btn').addEventListener('click', () => {
+        if (activeModalProgramId) toggleShortlist(activeModalProgramId);
+      });
+      document.getElementById('program-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'program-modal') closeProgramModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && activeModalProgramId) closeProgramModal();
+      });
+
+      // Recruit Notes Auto-Save
+      document.getElementById('modal-recruit-notes').addEventListener('input', (e) => {
+        if (!activeModalProgramId) return;
+        const val = e.target.value.trim();
+        if (val) {
+          recruitNotes[activeModalProgramId] = e.target.value;
+        } else {
+          delete recruitNotes[activeModalProgramId];
+        }
+        saveNotes();
+        const statusEl = document.getElementById('modal-note-status');
+        statusEl.classList.remove('opacity-0');
+        clearTimeout(window._noteSaveTimer);
+        window._noteSaveTimer = setTimeout(() => {
+          statusEl.classList.add('opacity-0');
+        }, 1200);
+      });
     };
 
     // Sort conference names either by Power Rating (desc) or A-Z
@@ -857,12 +1637,14 @@
         if (currentState !== 'ALL' && program.state !== currentState) return false;
 
         if (currentSearch !== '') {
+          const profile = getSchoolProfile(program);
           const nameMatch = program.name.toLowerCase().includes(currentSearch);
+          const nickMatch = profile.nickname.toLowerCase().includes(currentSearch);
           const cityMatch = program.city.toLowerCase().includes(currentSearch);
           const stateMatch = program.state.toLowerCase().includes(currentSearch);
           const stadiumMatch = program.stadium.toLowerCase().includes(currentSearch);
           const confMatch = program.conference.toLowerCase().includes(currentSearch);
-          if (!nameMatch && !cityMatch && !stateMatch && !stadiumMatch && !confMatch) return false;
+          if (!nameMatch && !nickMatch && !cityMatch && !stateMatch && !stadiumMatch && !confMatch) return false;
         }
 
         return true;
@@ -929,14 +1711,32 @@
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             ${teams.map(p => {
               const isSaved = shortlistIds.has(p.id);
+              const profile = getSchoolProfile(p);
+              const hasNote = Boolean(recruitNotes[p.id]);
               return `
-              <div class="${isSaved ? 'bg-rose-50/40 border-rose-200' : 'bg-brand-50/60 border-brand-100'} hover:bg-brand-50 border hover:border-brand-300 rounded-xl p-4 transition-all hover:shadow-md flex flex-col justify-between space-y-3">
+              <div 
+                onclick="openProgramModal('${p.id}')"
+                role="button"
+                tabindex="0"
+                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProgramModal('${p.id}');}"
+                class="${isSaved ? 'bg-rose-50/40 border-rose-200' : 'bg-brand-50/60 border-brand-100'} hover:bg-brand-50 border hover:border-brand-400 rounded-xl p-4 transition-all hover:shadow-md flex flex-col justify-between space-y-3 cursor-pointer group"
+              >
                 <div>
                   <div class="flex items-start justify-between gap-2 mb-1.5">
-                    <h3 class="font-bold text-slate-900 text-base leading-snug">${p.name}</h3>
+                    <div>
+                      <h3 class="font-bold text-slate-900 group-hover:text-brand-700 text-base leading-snug transition-colors">${p.name}</h3>
+                      <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500">
+                          <span class="w-2.5 h-2.5 rounded-full border border-slate-300 inline-block" style="background-color:${profile.primary}"></span>
+                          <span class="w-2.5 h-2.5 rounded-full border border-slate-300 inline-block" style="background-color:${profile.secondary}"></span>
+                          <span>${profile.nickname}</span>
+                        </span>
+                        ${hasNote ? `<span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded" title="You saved a private note for this school"><i class="fa-solid fa-note-sticky"></i> Note</span>` : ''}
+                      </div>
+                    </div>
                     <button 
                       type="button"
-                      onclick="toggleShortlist('${p.id}')"
+                      onclick="toggleShortlist('${p.id}', event)"
                       aria-label="${isSaved ? 'Remove from shortlist' : 'Add to shortlist'}"
                       title="${isSaved ? 'Saved to Recruit Shortlist (click to remove)' : 'Save to Recruit Shortlist'}"
                       class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center border transition ${isSaved ? 'bg-rose-500 text-white border-rose-500 shadow-sm' : 'bg-white text-slate-400 hover:text-rose-500 border-brand-100 hover:border-rose-200'}"
@@ -944,7 +1744,7 @@
                       <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-heart text-xs"></i>
                     </button>
                   </div>
-                  <div class="text-xs text-slate-500 space-y-1">
+                  <div class="text-xs text-slate-500 space-y-1 mt-2">
                     <p class="flex items-center gap-1.5">
                       <i class="fa-solid fa-location-dot text-brand-500 w-4"></i>
                       <span>${p.city}, ${p.state}</span>
@@ -994,8 +1794,9 @@
                     ${p.mens ? '<span class="bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded text-[10px]">Men\'s</span>' : ''}
                     ${p.womens ? '<span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[10px]">Women\'s</span>' : ''}
                   </div>
-                  <div class="text-[11px] text-slate-500 font-medium">
-                    <i class="fa-solid fa-users text-slate-400"></i> ${p.capacity.toLocaleString()} seats
+                  <div class="text-[11px] text-brand-700 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                    <span>View Kits &amp; Info</span>
+                    <i class="fa-solid fa-chevron-right text-[9px]"></i>
                   </div>
                 </div>
               </div>
