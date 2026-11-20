@@ -195,7 +195,7 @@
           <span id="jump-rating-mode" class="bg-brand-100 text-brand-700 px-2 py-0.5 rounded-md text-[10px] font-bold normal-case">Combined Ratings</span>
         </h2>
         <span class="text-xs text-slate-400 font-medium">
-          <i class="fa-solid fa-shirt text-brand-500 mr-1"></i> Click any school card to view jerseys, mascot &amp; program profile
+          <i class="fa-solid fa-shirt text-brand-500 mr-1"></i> Click any school card to customize jerseys, view mascot &amp; program profile
         </span>
       </div>
       <div id="conference-chips" class="flex flex-wrap gap-2">
@@ -218,7 +218,7 @@
               <span>Division I Soccer Program Leaderboard</span>
             </h2>
             <p id="rank-table-subtitle" class="text-xs text-slate-500 mt-0.5">
-              Click any column header to re-rank or click any row to inspect Home &amp; Away jersey replicas
+              Click any column header to re-rank or click any row to customize Home, Away &amp; Third jersey replicas
             </p>
           </div>
           <span id="rank-table-count" class="bg-white text-brand-800 px-3 py-1 rounded-full text-xs font-extrabold border border-brand-200 shadow-2xs">
@@ -263,7 +263,7 @@
 
   </main>
 
-  <!-- Program Profile & Jersey Replica Modal -->
+  <!-- Program Profile & Interactive Jersey Customizer Modal -->
   <div id="program-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-school-name">
     <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-brand-100 overflow-hidden my-auto">
       
@@ -296,19 +296,65 @@
       <!-- Modal Body -->
       <div class="p-6 space-y-6 max-h-[78vh] overflow-y-auto">
         
-        <!-- Jersey Replicas & Official Colors -->
-        <div class="bg-brand-50/70 rounded-2xl p-5 border border-brand-100">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <!-- Interactive Kit Customizer & Jersey Preview -->
+        <div class="bg-brand-50/70 rounded-2xl p-5 border border-brand-100 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <h3 class="text-xs font-extrabold uppercase tracking-wider text-brand-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-shirt text-brand-600"></i> Official Kit Replicas &amp; School Colors
+              <i class="fa-solid fa-shirt text-brand-600"></i> Interactive Kit Customizer
             </h3>
             <div id="modal-color-swatches" class="flex items-center gap-2 text-xs font-semibold text-slate-700">
               <!-- Color swatches injected here -->
             </div>
           </div>
 
-          <div id="modal-jerseys-container" class="grid grid-cols-2 gap-4">
-            <!-- Home & Away SVG Jersey Replicas injected here -->
+          <!-- Customizer Controls Bar -->
+          <div class="bg-white rounded-xl p-3 border border-brand-100 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+            
+            <!-- Kit Style Toggle: Home / Away / Third -->
+            <div class="flex bg-brand-100/80 p-1 rounded-lg font-bold" role="group" aria-label="Select jersey kit">
+              <button type="button" data-kit="HOME" class="kit-choice-btn px-2.5 py-1 rounded-md bg-white text-brand-800 shadow-2xs transition">Home</button>
+              <button type="button" data-kit="AWAY" class="kit-choice-btn px-2.5 py-1 rounded-md text-slate-600 hover:text-brand-800 transition">Away</button>
+              <button type="button" data-kit="THIRD" class="kit-choice-btn px-2.5 py-1 rounded-md text-slate-600 hover:text-brand-800 transition">Third Alt</button>
+            </div>
+
+            <!-- Front / Back View Toggle -->
+            <div class="flex bg-slate-100 p-1 rounded-lg font-bold" role="group" aria-label="Select jersey side">
+              <button type="button" data-side="FRONT" class="kit-side-btn px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-2xs transition">
+                <i class="fa-solid fa-user text-[10px] mr-1 text-brand-600"></i>Front
+              </button>
+              <button type="button" data-side="BACK" class="kit-side-btn px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition">
+                <i class="fa-solid fa-rotate text-[10px] mr-1 text-brand-600"></i>Back
+              </button>
+            </div>
+
+            <!-- Custom Number & Name Inputs -->
+            <div class="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
+              <div class="flex items-center bg-brand-50 border border-brand-200 rounded-lg px-2 py-1">
+                <span class="text-[10px] font-black text-brand-700 mr-1">#</span>
+                <input 
+                  type="text" 
+                  id="kit-number-input" 
+                  maxlength="2" 
+                  value="10" 
+                  aria-label="Custom jersey number"
+                  placeholder="10"
+                  class="w-7 bg-transparent font-black text-slate-900 text-center focus:outline-none"
+                >
+              </div>
+              <input 
+                type="text" 
+                id="kit-name-input" 
+                maxlength="14" 
+                aria-label="Custom jersey nameplate"
+                placeholder="YOUR NAME"
+                class="w-28 sm:w-32 bg-brand-50 border border-brand-200 rounded-lg px-2.5 py-1 font-extrabold uppercase tracking-wider text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              >
+            </div>
+          </div>
+
+          <!-- Active Kit Spotlight + Quick Thumbnail Strip -->
+          <div id="modal-jerseys-container" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-stretch">
+            <!-- Rendered dynamically by renderModalKitPreview() -->
           </div>
         </div>
 
@@ -818,83 +864,145 @@
       return yiq >= 155 ? '#0f172a' : '#ffffff';
     }
 
-    // Generate Realistic Custom SVG Soccer Jersey Replica (Home & Away Kits)
-    function createJerseySVG(program, profile, kitType = 'HOME') {
+    function escapeXML(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Generate Custom SVG Soccer Jersey Replica (Home, Away & Third Kits + Front/Back Views)
+    function createJerseySVG(program, profile, kitType = 'HOME', side = 'FRONT', customNumber = '10', customName = '', compact = false) {
       const isHome = kitType === 'HOME';
-      const baseColor = isHome ? profile.primary : '#FFFFFF';
-      const accentColor = isHome
-        ? (profile.secondary.toUpperCase() === '#FFFFFF' ? '#E2E8F0' : profile.secondary)
-        : profile.primary;
-      const trimColor = isHome ? profile.secondary : profile.primary;
+      const isThird = kitType === 'THIRD';
+      const isBack = side === 'BACK';
+
+      // Palette resolution for Home, Away, and Alternate/Third Kit
+      let baseColor, accentColor, trimColor;
+      if (isHome) {
+        baseColor = profile.primary;
+        accentColor = profile.secondary.toUpperCase() === '#FFFFFF' ? '#E2E8F0' : profile.secondary;
+        trimColor = profile.secondary;
+      } else if (isThird) {
+        // Alternate Third Kit: Dark Charcoal/Obsidian or Secondary Showcase
+        const secUpper = profile.secondary.toUpperCase();
+        const isLightSec = secUpper === '#FFFFFF' || secUpper === '#EEEDEB' || secUpper === '#FDF2D9' || secUpper === '#FDF9D8';
+        baseColor = isLightSec ? '#1E293B' : profile.secondary;
+        accentColor = profile.primary;
+        trimColor = profile.primary;
+      } else {
+        // Crisp White Away Kit
+        baseColor = '#FFFFFF';
+        accentColor = profile.primary;
+        trimColor = profile.primary;
+      }
+
       const numberColor = getContrastColor(baseColor);
-      const clipId = `jersey-clip-${program.id}-${kitType}`;
+      const displayNum = escapeXML((customNumber || '10').trim() || '10');
+      const displayName = escapeXML((customName || '').trim().toUpperCase());
+      const clipId = `jersey-clip-${program.id}-${kitType}-${side}-${compact ? 'sm' : 'lg'}`;
 
       let patternMarkup = '';
+      const patOpacity = isHome ? '0.88' : (isThird ? '0.85' : '0.24');
       if (profile.pattern === 'stripes') {
         patternMarkup = `
-          <rect x="64" y="25" width="14" height="175" fill="${accentColor}" opacity="${isHome ? '0.88' : '0.22'}" />
-          <rect x="93" y="25" width="14" height="175" fill="${accentColor}" opacity="${isHome ? '0.88' : '0.22'}" />
-          <rect x="122" y="25" width="14" height="175" fill="${accentColor}" opacity="${isHome ? '0.88' : '0.22'}" />
+          <rect x="64" y="25" width="14" height="175" fill="${accentColor}" opacity="${patOpacity}" />
+          <rect x="93" y="25" width="14" height="175" fill="${accentColor}" opacity="${patOpacity}" />
+          <rect x="122" y="25" width="14" height="175" fill="${accentColor}" opacity="${patOpacity}" />
         `;
       } else if (profile.pattern === 'hoops') {
         patternMarkup = `
-          <rect x="45" y="72" width="110" height="16" fill="${accentColor}" opacity="${isHome ? '0.9' : '0.25'}" />
-          <rect x="45" y="108" width="110" height="16" fill="${accentColor}" opacity="${isHome ? '0.9' : '0.25'}" />
-          <rect x="45" y="144" width="110" height="16" fill="${accentColor}" opacity="${isHome ? '0.9' : '0.25'}" />
+          <rect x="45" y="72" width="110" height="16" fill="${accentColor}" opacity="${patOpacity}" />
+          <rect x="45" y="108" width="110" height="16" fill="${accentColor}" opacity="${patOpacity}" />
+          <rect x="45" y="144" width="110" height="16" fill="${accentColor}" opacity="${patOpacity}" />
         `;
       } else if (profile.pattern === 'sash') {
         patternMarkup = `
-          <polygon points="48,30 74,30 155,188 129,188" fill="${accentColor}" opacity="${isHome ? '0.92' : '0.85'}" />
+          <polygon points="48,30 74,30 155,188 129,188" fill="${accentColor}" opacity="${isHome || isThird ? '0.92' : '0.85'}" />
         `;
       } else {
         patternMarkup = `
-          <rect x="52" y="25" width="6" height="175" fill="${accentColor}" opacity="0.45" />
-          <rect x="142" y="25" width="6" height="175" fill="${accentColor}" opacity="0.45" />
+          <rect x="52" y="25" width="6" height="175" fill="${accentColor}" opacity="0.55" />
+          <rect x="142" y="25" width="6" height="175" fill="${accentColor}" opacity="0.55" />
         `;
       }
 
-      const shortCode = program.conference.slice(0, 4).toUpperCase();
+      const shortCode = escapeXML(program.conference.slice(0, 4).toUpperCase());
+      const schoolTag = escapeXML(profile.nickname.slice(0, 14).toUpperCase());
+
+      // Front vs Back details
+      const collarMarkup = isBack
+        ? `<path d="M68,26 Q100,36 132,26 L126,22 Q100,30 74,22 Z" fill="${trimColor}" />`
+        : `<path d="M68,26 Q100,48 132,26 L124,23 Q100,39 76,23 Z" fill="${trimColor}" />`;
+
+      const centerGraphics = isBack
+        ? `
+          <!-- Player Nameplate on Back -->
+          ${displayName ? `
+            <text x="100" y="75" text-anchor="middle" font-size="13" font-weight="900" letter-spacing="1.4" font-family="Inter, sans-serif"
+                  fill="${numberColor}" stroke="${baseColor}" stroke-width="3" paint-order="stroke">${displayName}</text>
+          ` : `
+            <text x="100" y="75" text-anchor="middle" font-size="9" font-weight="800" letter-spacing="1.2" font-family="Inter, sans-serif"
+                  fill="${numberColor}" opacity="0.65">${schoolTag}</text>
+          `}
+
+          <!-- Large Back Kit Number -->
+          <text x="100" y="138" text-anchor="middle" font-size="52" font-weight="900" font-family="Inter, sans-serif"
+                fill="${numberColor}" stroke="${baseColor}" stroke-width="4.5" paint-order="stroke">${displayNum}</text>
+
+          <!-- Upper Back Neck Conference Emblem -->
+          <rect x="89" y="34" width="22" height="8" rx="2" fill="${trimColor}" />
+          <text x="100" y="39.8" text-anchor="middle" font-size="4.8" font-weight="900" fill="${getContrastColor(trimColor)}">${shortCode}</text>
+        `
+        : `
+          <!-- Left Chest School Crest -->
+          <circle cx="123" cy="68" r="9.5" fill="${trimColor}" stroke="#FFFFFF" stroke-width="1.5" />
+          <text x="123" y="71" text-anchor="middle" font-size="6.5" font-weight="900" fill="${getContrastColor(trimColor)}">D1</text>
+
+          <!-- Front Kit Number -->
+          <text x="100" y="130" text-anchor="middle" font-size="38" font-weight="900" font-family="Inter, sans-serif"
+                fill="${numberColor}" stroke="${baseColor}" stroke-width="4" paint-order="stroke">${displayNum}</text>
+
+          <!-- Optional Recruit Name Banner on Front -->
+          ${displayName ? `
+            <text x="100" y="156" text-anchor="middle" font-size="9.5" font-weight="900" letter-spacing="1.1" font-family="Inter, sans-serif"
+                  fill="${numberColor}" stroke="${baseColor}" stroke-width="2.5" paint-order="stroke">${displayName}</text>
+          ` : ''}
+
+          <!-- Bottom Hem Jock Tag -->
+          <rect x="60" y="175" width="22" height="7" rx="2" fill="${trimColor}" opacity="0.9" />
+          <text x="71" y="180.5" text-anchor="middle" font-size="4.5" font-weight="800" fill="${getContrastColor(trimColor)}">${shortCode}</text>
+        `;
+
+      const svgSizeClass = compact ? 'w-20 h-20' : 'w-44 h-44';
 
       return `
-        <div class="bg-white rounded-2xl p-3.5 border border-brand-100 flex flex-col items-center text-center shadow-2xs">
-          <svg viewBox="0 0 200 205" class="w-32 h-32 drop-shadow-sm" aria-label="${program.name} ${kitType} soccer jersey replica">
-            <defs>
-              <clipPath id="${clipId}">
-                <path d="M68,26 L36,42 L14,82 L38,96 L52,72 L52,188 L148,188 L148,72 L162,96 L186,82 L164,42 L132,26 Q100,42 68,26 Z" />
-              </clipPath>
-            </defs>
+        <svg viewBox="0 0 200 205" class="${svgSizeClass} drop-shadow-sm mx-auto" aria-label="${escapeXML(program.name)} ${kitType} ${side} soccer jersey replica">
+          <defs>
+            <clipPath id="${clipId}">
+              <path d="M68,26 L36,42 L14,82 L38,96 L52,72 L52,188 L148,188 L148,72 L162,96 L186,82 L164,42 L132,26 Q100,42 68,26 Z" />
+            </clipPath>
+          </defs>
 
-            <!-- Jersey Base Silhouette -->
-            <path d="M68,26 L36,42 L14,82 L38,96 L52,72 L52,188 L148,188 L148,72 L162,96 L186,82 L164,42 L132,26 Q100,42 68,26 Z"
-                  fill="${baseColor}" stroke="#CBD5E1" stroke-width="2.5" stroke-linejoin="round" />
+          <!-- Jersey Base Silhouette -->
+          <path d="M68,26 L36,42 L14,82 L38,96 L52,72 L52,188 L148,188 L148,72 L162,96 L186,82 L164,42 L132,26 Q100,42 68,26 Z"
+                fill="${baseColor}" stroke="#CBD5E1" stroke-width="2.5" stroke-linejoin="round" />
 
-            <!-- Clipped Kit Pattern -->
-            <g clip-path="url(#${clipId})">
-              ${patternMarkup}
-              <!-- Sleeve Cuffs -->
-              <rect x="10" y="75" width="38" height="10" transform="rotate(28 24 80)" fill="${trimColor}" />
-              <rect x="152" y="75" width="38" height="10" transform="rotate(-28 176 80)" fill="${trimColor}" />
-            </g>
+          <!-- Clipped Kit Pattern -->
+          <g clip-path="url(#${clipId})">
+            ${patternMarkup}
+            <!-- Sleeve Cuffs -->
+            <rect x="10" y="75" width="38" height="10" transform="rotate(28 24 80)" fill="${trimColor}" />
+            <rect x="152" y="75" width="38" height="10" transform="rotate(-28 176 80)" fill="${trimColor}" />
+          </g>
 
-            <!-- V-Neck Collar Trim -->
-            <path d="M68,26 Q100,48 132,26 L124,23 Q100,39 76,23 Z" fill="${trimColor}" />
+          <!-- Collar Trim -->
+          ${collarMarkup}
 
-            <!-- Left Chest School Crest -->
-            <circle cx="123" cy="68" r="9.5" fill="${trimColor}" stroke="#FFFFFF" stroke-width="1.5" />
-            <text x="123" y="71" text-anchor="middle" font-size="6.5" font-weight="900" fill="${getContrastColor(trimColor)}">D1</text>
-
-            <!-- Front Kit Number -->
-            <text x="100" y="132" text-anchor="middle" font-size="40" font-weight="900" font-family="Inter, sans-serif"
-                  fill="${numberColor}" stroke="${baseColor}" stroke-width="4" paint-order="stroke">10</text>
-
-            <!-- Bottom Hem Jock Tag -->
-            <rect x="60" y="175" width="22" height="7" rx="2" fill="${trimColor}" opacity="0.9" />
-            <text x="71" y="180.5" text-anchor="middle" font-size="4.5" font-weight="800" fill="${getContrastColor(trimColor)}">${shortCode}</text>
-          </svg>
-          <span class="mt-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-700">
-            ${isHome ? 'Primary Home Kit' : 'Secondary Away Kit'}
-          </span>
-        </div>
+          <!-- Front or Back Markings -->
+          ${centerGraphics}
+        </svg>
       `;
     }
 
@@ -1348,6 +1456,8 @@
     // State Variables
     const SHORTLIST_STORAGE_KEY = 'pitch_map_recruit_shortlist_v1';
     const NOTES_STORAGE_KEY = 'pitch_map_recruit_notes_v1';
+    const KIT_PREFS_STORAGE_KEY = 'pitch_map_kit_prefs_v1';
+
     let currentView = 'CONF'; // 'CONF' | 'TABLE'
     let currentGender = 'ALL'; // 'ALL' | 'MEN' | 'WOMEN'
     let currentState = 'ALL';
@@ -1357,6 +1467,7 @@
     let onlyShortlist = false;
     let shortlistIds = new Set(loadJSONStorage(SHORTLIST_STORAGE_KEY, []));
     let recruitNotes = loadJSONStorage(NOTES_STORAGE_KEY, {});
+    let kitPrefs = loadJSONStorage(KIT_PREFS_STORAGE_KEY, { kit: 'HOME', side: 'FRONT', number: '10', name: '' });
     let activeModalProgramId = null;
 
     function loadJSONStorage(key, fallback) {
@@ -1365,6 +1476,14 @@
         return saved ? JSON.parse(saved) : fallback;
       } catch (e) {
         return fallback;
+      }
+    }
+
+    function saveKitPrefs() {
+      try {
+        localStorage.setItem(KIT_PREFS_STORAGE_KEY, JSON.stringify(kitPrefs));
+      } catch (e) {
+        // Ignore storage errors
       }
     }
 
@@ -1478,6 +1597,112 @@
       };
     }
 
+    // Interactive Kit Customizer Helpers
+    function setKitType(kitType) {
+      kitPrefs.kit = kitType;
+      saveKitPrefs();
+      syncCustomizerControls();
+      renderModalKitPreview();
+    }
+
+    function setKitSide(side) {
+      kitPrefs.side = side;
+      saveKitPrefs();
+      syncCustomizerControls();
+      renderModalKitPreview();
+    }
+
+    function syncCustomizerControls() {
+      document.querySelectorAll('.kit-choice-btn').forEach(btn => {
+        if (btn.dataset.kit === kitPrefs.kit) {
+          btn.classList.add('bg-white', 'text-brand-800', 'shadow-2xs');
+          btn.classList.remove('text-slate-600');
+        } else {
+          btn.classList.remove('bg-white', 'text-brand-800', 'shadow-2xs');
+          btn.classList.add('text-slate-600');
+        }
+      });
+
+      document.querySelectorAll('.kit-side-btn').forEach(btn => {
+        if (btn.dataset.side === kitPrefs.side) {
+          btn.classList.add('bg-white', 'text-slate-900', 'shadow-2xs');
+          btn.classList.remove('text-slate-600');
+        } else {
+          btn.classList.remove('bg-white', 'text-slate-900', 'shadow-2xs');
+          btn.classList.add('text-slate-600');
+        }
+      });
+
+      const numInput = document.getElementById('kit-number-input');
+      const nameInput = document.getElementById('kit-name-input');
+      if (numInput && numInput.value !== kitPrefs.number) numInput.value = kitPrefs.number;
+      if (nameInput && nameInput.value !== kitPrefs.name) nameInput.value = kitPrefs.name;
+    }
+
+    function renderModalKitPreview() {
+      if (!activeModalProgramId) return;
+      const program = D1_SOCCER_PROGRAMS.find(p => p.id === activeModalProgramId);
+      if (!program) return;
+      const profile = getSchoolProfile(program);
+
+      const kitTitles = {
+        HOME: 'Primary Home Kit',
+        AWAY: 'Secondary Away Kit',
+        THIRD: 'Third Alternate Kit'
+      };
+
+      const sideLabel = kitPrefs.side === 'BACK' ? 'Back Nameplate View' : 'Front Crest View';
+      const customCaption = kitPrefs.name.trim()
+        ? `#${kitPrefs.number || '10'} ${kitPrefs.name.trim().toUpperCase()}`
+        : `#${kitPrefs.number || '10'} • ${profile.nickname}`;
+
+      const kits = ['HOME', 'AWAY', 'THIRD'];
+
+      document.getElementById('modal-jerseys-container').innerHTML = `
+        <!-- Main Interactive Spotlight Card -->
+        <div class="sm:col-span-7 bg-white rounded-2xl p-4 border border-brand-200/80 flex flex-col items-center justify-between text-center shadow-2xs relative">
+          <div class="w-full flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
+            <span>${kitTitles[kitPrefs.kit]}</span>
+            <span class="text-brand-600">${sideLabel}</span>
+          </div>
+
+          <div class="my-1 transition-transform duration-200 hover:scale-105 cursor-pointer" onclick="setKitSide('${kitPrefs.side === 'FRONT' ? 'BACK' : 'FRONT'}')" title="Click jersey to flip Front / Back">
+            ${createJerseySVG(program, profile, kitPrefs.kit, kitPrefs.side, kitPrefs.number, kitPrefs.name, false)}
+          </div>
+
+          <div class="w-full pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+            <span class="text-xs font-black text-slate-800 truncate">${escapeXML(customCaption)}</span>
+            <button type="button" onclick="setKitSide('${kitPrefs.side === 'FRONT' ? 'BACK' : 'FRONT'}')" class="text-[11px] font-bold text-brand-700 hover:text-brand-900 bg-brand-50 hover:bg-brand-100 px-2.5 py-1 rounded-lg transition shrink-0">
+              <i class="fa-solid fa-repeat mr-1"></i>Flip ${kitPrefs.side === 'FRONT' ? 'Back' : 'Front'}
+            </button>
+          </div>
+        </div>
+
+        <!-- 3-Kit Quick Switcher Stack -->
+        <div class="sm:col-span-5 grid grid-cols-3 sm:grid-cols-1 gap-2">
+          ${kits.map(k => {
+            const active = kitPrefs.kit === k;
+            const label = k === 'HOME' ? 'Home Kit' : (k === 'AWAY' ? 'Away Kit' : 'Third Alt');
+            return `
+              <button 
+                type="button" 
+                onclick="setKitType('${k}')"
+                class="rounded-xl p-2 border text-left transition flex flex-col sm:flex-row items-center gap-2 ${active ? 'bg-white border-brand-500 ring-2 ring-brand-500/20 shadow-xs' : 'bg-white/70 hover:bg-white border-brand-100 opacity-85 hover:opacity-100'}"
+              >
+                <div class="shrink-0">
+                  ${createJerseySVG(program, profile, k, kitPrefs.side, kitPrefs.number, kitPrefs.name, true)}
+                </div>
+                <div class="text-center sm:text-left min-w-0">
+                  <div class="text-[11px] font-extrabold text-slate-900 truncate">${label}</div>
+                  <div class="text-[10px] font-semibold ${active ? 'text-brand-600' : 'text-slate-400'}">${active ? 'Selected' : 'Preview'}</div>
+                </div>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
     // Open School Detail & Jersey Replica Modal
     function openProgramModal(programId) {
       const program = D1_SOCCER_PROGRAMS.find(p => p.id === programId);
@@ -1507,10 +1732,8 @@
         </span>
       `;
 
-      document.getElementById('modal-jerseys-container').innerHTML = `
-        ${createJerseySVG(program, profile, 'HOME')}
-        ${createJerseySVG(program, profile, 'AWAY')}
-      `;
+      syncCustomizerControls();
+      renderModalKitPreview();
 
       document.getElementById('modal-stadium').textContent = program.stadium;
       document.getElementById('modal-stadium-meta').textContent = `${program.capacity.toLocaleString()} seats • ${program.surface}`;
@@ -1693,6 +1916,32 @@
         if (e.key === 'Escape' && activeModalProgramId) closeProgramModal();
       });
 
+      // Kit Customizer Listeners
+      document.querySelectorAll('.kit-choice-btn').forEach(btn => {
+        btn.addEventListener('click', () => setKitType(btn.dataset.kit));
+      });
+      document.querySelectorAll('.kit-side-btn').forEach(btn => {
+        btn.addEventListener('click', () => setKitSide(btn.dataset.side));
+      });
+      document.getElementById('kit-number-input').addEventListener('input', (e) => {
+        const cleaned = e.target.value.replace(/[^0-9]/g, '').slice(0, 2);
+        e.target.value = cleaned;
+        kitPrefs.number = cleaned || '10';
+        saveKitPrefs();
+        renderModalKitPreview();
+      });
+      document.getElementById('kit-name-input').addEventListener('input', (e) => {
+        const cleaned = e.target.value.replace(/[^a-zA-Z\s\-'.]/g, '').slice(0, 14);
+        e.target.value = cleaned;
+        kitPrefs.name = cleaned;
+        if (cleaned.trim() && kitPrefs.side === 'FRONT') {
+          setKitSide('BACK');
+          return;
+        }
+        saveKitPrefs();
+        renderModalKitPreview();
+      });
+
       // Recruit Notes Auto-Save
       document.getElementById('modal-recruit-notes').addEventListener('input', (e) => {
         if (!activeModalProgramId) return;
@@ -1848,7 +2097,7 @@
       const genderLabel = currentGender === 'MEN'
         ? "Men's soccer stats & Men's conference ratings"
         : (currentGender === 'WOMEN' ? "Women's soccer stats & Women's conference ratings" : "Combined Men's & Women's stats");
-      subtitleEl.textContent = `Showing ${genderLabel} • Click any column header to re-rank or click any row to inspect Home & Away jersey replicas`;
+      subtitleEl.textContent = `Showing ${genderLabel} • Click any column header to re-rank or click any row to customize Home, Away & Third jersey replicas`;
 
       if (filtered.length === 0) {
         tbody.innerHTML = `
@@ -2111,7 +2360,7 @@
                     ${p.womens ? '<span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[10px]">Women\'s</span>' : ''}
                   </div>
                   <div class="text-[11px] text-brand-700 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                    <span>View Kits &amp; Info</span>
+                    <span>Customize Kits &amp; Info</span>
                     <i class="fa-solid fa-chevron-right text-[9px]"></i>
                   </div>
                 </div>
