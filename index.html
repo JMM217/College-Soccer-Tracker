@@ -192,6 +192,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-2">
           <i class="fa-solid fa-compass text-brand-500"></i> Jump to Conference
+          <span id="jump-rating-mode" class="bg-brand-100 text-brand-700 px-2 py-0.5 rounded-md text-[10px] font-bold normal-case">Combined Ratings</span>
         </h2>
         <span class="text-xs text-slate-400 font-medium">
           <i class="fa-solid fa-shirt text-brand-500 mr-1"></i> Click any school card to view jerseys, mascot &amp; program profile
@@ -360,40 +361,50 @@
   </div>
 
   <script>
-    // Conference Power Rankings (Out of 5 Stars)
+    // Gender-Specific Conference Power Rankings (Out of 5 Stars: { all, men, women })
     const CONFERENCE_RATINGS = {
-      "ACC": 5.0,
-      "Big Ten": 5.0,
-      "SEC": 5.0,
-      "Big 12": 4.5,
-      "Big East": 4.5,
-      "Sun Belt": 4.0,
-      "AAC": 4.0,
-      "WCC": 4.0,
-      "Big West": 4.0,
-      "Mountain West": 4.0,
-      "Atlantic 10": 3.5,
-      "Ivy League": 3.5,
-      "Pac-12": 3.0,
-      "CAA": 3.0,
-      "Patriot League": 3.0,
-      "SoCon": 3.0,
-      "WAC": 3.0,
-      "MVC": 2.5,
-      "Summit League": 2.5,
-      "ASUN": 2.5,
-      "Big South": 2.5,
-      "Southland": 2.5,
-      "SWAC": 2.5,
-      "CUSA": 2.0,
-      "MAC": 2.0,
-      "MAAC": 2.0,
-      "America East": 2.0,
-      "Horizon League": 2.0,
-      "Big Sky": 2.0,
-      "OVC": 2.0,
-      "NEC": 1.5
+      "ACC":            { all: 5.0, men: 5.0, women: 5.0 },
+      "Big Ten":        { all: 5.0, men: 4.5, women: 5.0 },
+      "SEC":            { all: 5.0, men: 3.5, women: 5.0 },
+      "Big 12":         { all: 4.5, men: 3.5, women: 4.5 },
+      "Big East":       { all: 4.5, men: 4.5, women: 4.0 },
+      "Sun Belt":       { all: 4.0, men: 4.5, women: 3.0 },
+      "AAC":            { all: 4.0, men: 4.0, women: 3.5 },
+      "WCC":            { all: 4.0, men: 3.5, women: 4.0 },
+      "Big West":       { all: 4.0, men: 4.0, women: 3.5 },
+      "Mountain West":  { all: 4.0, men: 3.0, women: 4.0 },
+      "Atlantic 10":    { all: 3.5, men: 3.5, women: 3.0 },
+      "Ivy League":     { all: 3.5, men: 3.5, women: 3.5 },
+      "Pac-12":         { all: 3.0, men: 3.5, women: 3.5 },
+      "CAA":            { all: 3.0, men: 3.0, women: 3.0 },
+      "Patriot League": { all: 3.0, men: 3.0, women: 2.5 },
+      "SoCon":          { all: 3.0, men: 3.0, women: 2.5 },
+      "WAC":            { all: 3.0, men: 3.0, women: 2.5 },
+      "MVC":            { all: 2.5, men: 3.0, women: 2.5 },
+      "Summit League":  { all: 2.5, men: 2.5, women: 2.5 },
+      "ASUN":           { all: 2.5, men: 2.5, women: 2.5 },
+      "Big South":      { all: 2.5, men: 2.5, women: 2.0 },
+      "Southland":      { all: 2.5, men: 2.0, women: 2.5 },
+      "SWAC":           { all: 2.5, men: 2.0, women: 2.5 },
+      "CUSA":           { all: 2.0, men: 3.0, women: 2.0 },
+      "MAC":            { all: 2.0, men: 3.0, women: 2.0 },
+      "MAAC":           { all: 2.0, men: 2.0, women: 2.0 },
+      "America East":   { all: 2.0, men: 2.5, women: 2.0 },
+      "Horizon League": { all: 2.0, men: 2.0, women: 2.0 },
+      "Big Sky":        { all: 2.0, men: 2.0, women: 2.0 },
+      "OVC":            { all: 2.0, men: 2.0, women: 2.0 },
+      "NEC":            { all: 1.5, men: 1.5, women: 1.5 }
     };
+
+    // Resolve Conference Rating based on active Gender Filter ('ALL', 'MEN', or 'WOMEN')
+    function getConferenceRating(confName, genderOverride = null) {
+      const entry = CONFERENCE_RATINGS[confName];
+      if (!entry) return 2.5;
+      const g = genderOverride || currentGender;
+      if (g === 'MEN') return entry.men;
+      if (g === 'WOMEN') return entry.women;
+      return entry.all;
+    }
 
     // Detailed Branding, Nicknames, Official Colors & Campus Metadata for D1 Programs
     const SCHOOL_PROFILES = {
@@ -887,8 +898,8 @@
       `;
     }
 
-    // Helper to render 5-star icons
-    function renderStarRating(rating) {
+    // Helper to render 5-star icons (Gender-Aware)
+    function renderStarRating(rating, label = '') {
       const score = rating || 2.5;
       const fullStars = Math.floor(score);
       const hasHalf = score % 1 >= 0.5;
@@ -905,10 +916,13 @@
         starsHtml += '<i class="fa-regular fa-star text-slate-300"></i>';
       }
 
+      const scopeText = label || (currentGender === 'MEN' ? "Men's" : (currentGender === 'WOMEN' ? "Women's" : 'Overall'));
+
       return `
-        <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-xl" title="Conference Power Rating: ${score.toFixed(1)} / 5.0">
+        <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-xl" title="${scopeText} Conference Power Rating: ${score.toFixed(1)} / 5.0">
           <div class="flex items-center gap-0.5 text-xs">${starsHtml}</div>
           <span class="text-xs font-extrabold text-amber-900">${score.toFixed(1)}</span>
+          ${currentGender !== 'ALL' ? `<span class="text-[10px] font-bold text-amber-700/80 uppercase tracking-tight">(${scopeText})</span>` : ''}
         </div>
       `;
     }
@@ -1335,7 +1349,7 @@
     const SHORTLIST_STORAGE_KEY = 'pitch_map_recruit_shortlist_v1';
     const NOTES_STORAGE_KEY = 'pitch_map_recruit_notes_v1';
     let currentView = 'CONF'; // 'CONF' | 'TABLE'
-    let currentGender = 'ALL';
+    let currentGender = 'ALL'; // 'ALL' | 'MEN' | 'WOMEN'
     let currentState = 'ALL';
     let currentSearch = '';
     let currentSort = 'RATING';
@@ -1459,7 +1473,7 @@
         ncaaTitles: (m ? m.ncaaTitles : 0) + (w ? w.ncaaTitles : 0),
         ncaaApps: (m ? m.ncaaApps : 0) + (w ? w.ncaaApps : 0),
         confTitles: (m ? m.confTitles : 0) + (w ? w.confTitles : 0),
-        confRating: CONFERENCE_RATINGS[program.conference] || 0,
+        confRating: getConferenceRating(program.conference),
         capacity: program.capacity || 0
       };
     }
@@ -1500,10 +1514,20 @@
 
       document.getElementById('modal-stadium').textContent = program.stadium;
       document.getElementById('modal-stadium-meta').textContent = `${program.capacity.toLocaleString()} seats • ${program.surface}`;
-      document.getElementById('modal-conf-rating').innerHTML = renderStarRating(CONFERENCE_RATINGS[program.conference]);
-      document.getElementById('modal-sponsors').textContent = program.mens && program.womens
+
+      // Show gender-specific conference ratings in modal
+      const confEntry = CONFERENCE_RATINGS[program.conference];
+      const activeRating = getConferenceRating(program.conference);
+      document.getElementById('modal-conf-rating').innerHTML = renderStarRating(activeRating);
+
+      let ratingBreakdown = program.mens && program.womens
         ? "Sponsors Men's & Women's"
         : (program.mens ? "Men's Soccer Only" : "Women's Soccer Only");
+      if (confEntry && program.mens && program.womens) {
+        ratingBreakdown += ` • M: ★${confEntry.men.toFixed(1)} | W: ★${confEntry.women.toFixed(1)}`;
+      }
+      document.getElementById('modal-sponsors').textContent = ratingBreakdown;
+
       document.getElementById('modal-campus-type').textContent = `${profile.type} Institution`;
       document.getElementById('modal-enrollment').textContent = profile.enrollment;
 
@@ -1688,12 +1712,12 @@
       });
     };
 
-    // Sort conference names either by Power Rating (desc) or A-Z
+    // Sort conference names either by Gender-Aware Power Rating (desc) or A-Z
     function sortConferences(confNames) {
       return [...confNames].sort((a, b) => {
         if (currentSort === 'RATING') {
-          const rA = CONFERENCE_RATINGS[a] || 0;
-          const rB = CONFERENCE_RATINGS[b] || 0;
+          const rA = getConferenceRating(a);
+          const rB = getConferenceRating(b);
           if (rB !== rA) return rB - rA;
         }
         return a.localeCompare(b);
@@ -1712,7 +1736,7 @@
       });
     }
 
-    // Set Gender Filter
+    // Set Gender Filter (Updates conference ratings, jump chips, and dashboard)
     function setGenderFilter(gender, btnElement) {
       currentGender = gender;
       document.querySelectorAll('.gender-btn').forEach(b => {
@@ -1721,6 +1745,7 @@
       });
       btnElement.classList.add('bg-white', 'text-brand-800', 'shadow-sm');
       btnElement.classList.remove('text-slate-600');
+      renderConferenceChips();
       renderDashboard();
     }
 
@@ -1737,7 +1762,6 @@
       sortFilter.value = 'RATING';
       tableSortFilter.value = 'NCAA_TITLES';
       updateShortlistUI();
-      renderConferenceChips();
       setGenderFilter('ALL', document.getElementById('btn-gender-all'));
     }
 
@@ -1760,14 +1784,27 @@
       womensCountEl.textContent = womensTotal;
     }
 
-    // Render Jump-to Chips
+    // Render Jump-to Chips (Filtered & Rated by Active Gender)
     function renderConferenceChips() {
-      const activePrograms = D1_SOCCER_PROGRAMS.filter(p => p.mens || p.womens);
+      const activePrograms = D1_SOCCER_PROGRAMS.filter(p => {
+        if (!p.mens && !p.womens) return false;
+        if (currentGender === 'MEN' && !p.mens) return false;
+        if (currentGender === 'WOMEN' && !p.womens) return false;
+        return true;
+      });
+
+      const modeBadge = document.getElementById('jump-rating-mode');
+      if (modeBadge) {
+        modeBadge.textContent = currentGender === 'MEN'
+          ? "Men's Conference Ratings"
+          : (currentGender === 'WOMEN' ? "Women's Conference Ratings" : 'Combined Ratings');
+      }
+
       const conferences = sortConferences([...new Set(activePrograms.map(p => p.conference))]);
       conferenceChipsEl.innerHTML = '';
 
       conferences.forEach(conf => {
-        const rating = CONFERENCE_RATINGS[conf];
+        const rating = getConferenceRating(conf);
         const chip = document.createElement('a');
         chip.href = `#conf-${conf.replace(/\s+/g, '-').toLowerCase()}`;
         chip.className = "px-3 py-1.5 bg-white hover:bg-brand-500 hover:text-white border border-brand-200 text-brand-800 font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5";
@@ -1809,8 +1846,8 @@
       countBadge.textContent = `${filtered.length} ${filtered.length === 1 ? 'Program' : 'Programs'}`;
 
       const genderLabel = currentGender === 'MEN'
-        ? "Men's soccer stats"
-        : (currentGender === 'WOMEN' ? "Women's soccer stats" : "Combined Men's & Women's stats");
+        ? "Men's soccer stats & Men's conference ratings"
+        : (currentGender === 'WOMEN' ? "Women's soccer stats & Women's conference ratings" : "Combined Men's & Women's stats");
       subtitleEl.textContent = `Showing ${genderLabel} • Click any column header to re-rank or click any row to inspect Home & Away jersey replicas`;
 
       if (filtered.length === 0) {
@@ -1966,7 +2003,7 @@
       // Render each conference section
       sortConferences(Object.keys(grouped)).forEach(conf => {
         const teams = grouped[conf];
-        const rating = CONFERENCE_RATINGS[conf];
+        const rating = getConferenceRating(conf);
         const sectionId = `conf-${conf.replace(/\s+/g, '-').toLowerCase()}`;
 
         const section = document.createElement('section');
