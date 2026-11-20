@@ -75,15 +75,26 @@
       </div>
     </div>
 
-    <!-- Quick Stats Header Badges -->
-    <div class="flex items-center space-x-3 text-xs bg-brand-900/60 px-4 py-2 rounded-xl border border-brand-700">
-      <div><span id="total-programs-count" class="font-bold text-brand-200">0</span> <span class="text-slate-300">Teams</span></div>
-      <span class="text-brand-600">|</span>
-      <div><span id="total-conferences-count" class="font-bold text-sky-300">0</span> <span class="text-slate-300">Conferences</span></div>
-      <span class="text-brand-600">|</span>
-      <div><span id="mens-count" class="font-bold text-blue-300">0</span> <span class="text-slate-300">Men's</span></div>
-      <span class="text-brand-600">|</span>
-      <div><span id="womens-count" class="font-bold text-indigo-300">0</span> <span class="text-slate-300">Women's</span></div>
+    <!-- Header Right: Recruit Fit Quiz Trigger + Quick Stats -->
+    <div class="flex flex-wrap items-center gap-3">
+      <button 
+        id="btn-open-quiz" 
+        type="button"
+        class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs px-3.5 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+      >
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>Recruit Fit Quiz</span>
+      </button>
+
+      <div class="flex items-center space-x-3 text-xs bg-brand-900/60 px-4 py-2 rounded-xl border border-brand-700">
+        <div><span id="total-programs-count" class="font-bold text-brand-200">0</span> <span class="text-slate-300">Teams</span></div>
+        <span class="text-brand-600">|</span>
+        <div><span id="total-conferences-count" class="font-bold text-sky-300">0</span> <span class="text-slate-300">Conferences</span></div>
+        <span class="text-brand-600">|</span>
+        <div><span id="mens-count" class="font-bold text-blue-300">0</span> <span class="text-slate-300">Men's</span></div>
+        <span class="text-brand-600">|</span>
+        <div><span id="womens-count" class="font-bold text-indigo-300">0</span> <span class="text-slate-300">Women's</span></div>
+      </div>
     </div>
   </header>
 
@@ -147,6 +158,7 @@
             aria-label="Rank programs by"
             class="appearance-none pl-3.5 pr-8 py-1.5 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
           >
+            <option value="PILLAR_OVERALL">Rank: 5-Pillar Overall</option>
             <option value="NCAA_TITLES">Rank: NCAA Titles</option>
             <option value="NCAA_APPS">Rank: NCAA Appearances</option>
             <option value="CONF_TITLES">Rank: Conference Titles</option>
@@ -195,7 +207,7 @@
           <span id="jump-rating-mode" class="bg-brand-100 text-brand-700 px-2 py-0.5 rounded-md text-[10px] font-bold normal-case">Combined Ratings</span>
         </h2>
         <span class="text-xs text-slate-400 font-medium">
-          <i class="fa-solid fa-shirt text-brand-500 mr-1"></i> Click any school card to customize jerseys, view mascot &amp; program profile
+          <i class="fa-solid fa-shirt text-brand-500 mr-1"></i> Click any school card for 5-pillar ratings, jersey customizer &amp; program profile
         </span>
       </div>
       <div id="conference-chips" class="flex flex-wrap gap-2">
@@ -218,7 +230,7 @@
               <span>Division I Soccer Program Leaderboard</span>
             </h2>
             <p id="rank-table-subtitle" class="text-xs text-slate-500 mt-0.5">
-              Click any column header to re-rank or click any row to customize Home, Away &amp; Third jersey replicas
+              Click any column header to re-rank or click any row to inspect 5-pillar ratings &amp; customize jerseys
             </p>
           </div>
           <span id="rank-table-count" class="bg-white text-brand-800 px-3 py-1 rounded-full text-xs font-extrabold border border-brand-200 shadow-2xs">
@@ -236,6 +248,9 @@
                 </th>
                 <th class="py-3.5 px-3 cursor-pointer hover:text-brand-700 transition" onclick="setTableSort('CONF_RATING')">
                   Conference <i class="fa-solid fa-sort ml-1 text-slate-300"></i>
+                </th>
+                <th class="py-3.5 px-3 text-center cursor-pointer hover:text-brand-700 transition" onclick="setTableSort('PILLAR_OVERALL')">
+                  5-Pillar Avg <i class="fa-solid fa-sort ml-1 text-slate-300"></i>
                 </th>
                 <th class="py-3.5 px-3">Teams</th>
                 <th class="py-3.5 px-3 text-center cursor-pointer hover:text-brand-700 transition" onclick="setTableSort('NCAA_TITLES')">
@@ -262,6 +277,33 @@
     </section>
 
   </main>
+
+  <!-- Recruit Fit Matcher Quiz Modal -->
+  <div id="quiz-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/65 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="quiz-modal-title">
+    <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-brand-100 overflow-hidden my-auto">
+      
+      <!-- Quiz Header -->
+      <div class="bg-gradient-to-r from-brand-900 via-brand-800 to-sky-800 px-6 py-5 text-white flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center text-lg font-black shadow">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <div>
+            <h2 id="quiz-modal-title" class="text-xl font-black tracking-tight">Recruit Fit Target School Quiz</h2>
+            <p class="text-xs text-brand-200">Answer 4 quick questions to rank your top matching D1 programs</p>
+          </div>
+        </div>
+        <button id="quiz-close-btn" type="button" aria-label="Close quiz" class="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition border border-white/20">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <!-- Quiz Body -->
+      <div id="quiz-body" class="p-6 space-y-5 max-h-[78vh] overflow-y-auto">
+        <!-- Rendered dynamically by renderQuizModal() -->
+      </div>
+    </div>
+  </div>
 
   <!-- Program Profile & Interactive Jersey Customizer Modal -->
   <div id="program-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-school-name">
@@ -296,6 +338,11 @@
       <!-- Modal Body -->
       <div class="p-6 space-y-6 max-h-[78vh] overflow-y-auto">
         
+        <!-- 5-Pillar Individual School Scorecard -->
+        <div id="modal-pillars-card" class="bg-white rounded-2xl p-5 border border-brand-100 shadow-2xs space-y-3.5">
+          <!-- Injected dynamically -->
+        </div>
+
         <!-- Interactive Kit Customizer & Jersey Preview -->
         <div class="bg-brand-50/70 rounded-2xl p-5 border border-brand-100 space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-2">
@@ -450,6 +497,127 @@
       if (g === 'MEN') return entry.men;
       if (g === 'WOMEN') return entry.women;
       return entry.all;
+    }
+
+    // Individual 5-Pillar School Rating Engine (Academics, Soccer Facilities, Location, Program Strength, Campus)
+    const ELITE_ACADEMIC_IDS = new Set([
+      "stanford", "harvard", "yale", "princeton", "columbia", "penn", "brown", "dartmouth", "cornell",
+      "duke", "northwestern", "nd", "vanderbilt", "rice", "georgetown", "cal", "ucla", "michigan",
+      "unc", "virginia", "usc", "bc", "wake", "georgiatech", "williammary", "navy", "army", "airforce",
+      "airforce-mw", "davidson", "lehigh", "bucknell", "lafayette", "colgate", "holycross", "villanova",
+      "santaclara", "pepperdine", "sandiego", "lmu", "gonzaga", "gwu", "american", "richmond", "elon",
+      "furman", "wofford", "coloradocollege", "tulsa", "smu", "tcu", "baylor", "texas", "florida",
+      "washington", "illinois", "wisconsin", "ohio-state", "pennstate", "md", "purdue", "ucsd", "ucsb",
+      "uci", "ucdavis", "calpoly", "bu", "northeastern", "fordham", "creighton", "marquette", "xavier",
+      "butler", "denver", "stthomas", "byu", "vt", "clemson", "tamui", "georgia", "minnesota", "iowa",
+      "rutgers", "msu", "indiana", "ncstate", "pitt", "syracuse", "miamifl"
+    ]);
+
+    const PREMIER_ACADEMIC_IDS = new Set([
+      "stanford", "harvard", "yale", "princeton", "columbia", "penn", "brown", "dartmouth", "cornell",
+      "duke", "northwestern", "nd", "vanderbilt", "rice", "georgetown", "cal", "ucla", "michigan",
+      "unc", "virginia", "usc", "bc", "wake", "georgiatech", "williammary", "navy", "army", "airforce",
+      "airforce-mw", "davidson", "lehigh", "bucknell", "lafayette", "colgate", "holycross", "villanova",
+      "coloradocollege", "richmond", "davidson", "bu", "northeastern", "texas", "florida", "washington"
+    ]);
+
+    const DESTINATION_STATES = new Set(["CA", "FL", "NC", "SC", "VA", "TX", "CO", "WA", "OR", "TN", "GA", "HI", "AZ", "MA", "NY", "DC", "MD", "UT", "IL"]);
+    const SOCCER_HOTBED_CITIES = new Set([
+      "Chapel Hill", "Charlottesville", "Clemson", "Durham", "Winston-Salem", "Bloomington", "College Park",
+      "Los Angeles", "Seattle", "Stanford", "Berkeley", "Santa Barbara", "San Diego", "Portland", "Denver",
+      "St. Louis", "Washington", "Austin", "Dallas", "Orlando", "Tampa", "Boston", "Cambridge", "Princeton",
+      "New Haven", "Providence", "Ann Arbor", "Columbus", "Madison", "Provo", "Nashville", "Charleston",
+      "Wilmington", "Greensboro", "Greenville", "Akron", "Omaha", "Milwaukee", "Huntington", "Burlington"
+    ]);
+
+    function clampHalfStar(val) {
+      const clamped = Math.max(1.5, Math.min(5.0, val));
+      return Math.round(clamped * 2) / 2;
+    }
+
+    function parseUndergradSize(enrollmentStr) {
+      if (!enrollmentStr) return 12000;
+      const digits = enrollmentStr.replace(/[^0-9]/g, '');
+      return digits ? parseInt(digits, 10) : 12000;
+    }
+
+    // Compute 5 Pillars (1.5 to 5.0 stars) for any program
+    function getSchoolPillars(program, genderOverride = null) {
+      const g = genderOverride || currentGender;
+      const profile = getSchoolProfile(program);
+      const confRating = getConferenceRating(program.conference, g);
+
+      const m = (g !== 'WOMEN' && program.mens && program.mensStats) ? program.mensStats : null;
+      const w = (g !== 'MEN' && program.womens && program.womensStats) ? program.womensStats : null;
+
+      const ncaaTitles = (m ? m.ncaaTitles : 0) + (w ? w.ncaaTitles : 0);
+      const ncaaApps = (m ? m.ncaaApps : 0) + (w ? w.ncaaApps : 0);
+      const confTitles = (m ? m.confTitles : 0) + (w ? w.confTitles : 0);
+
+      // 1. Program Strength (Conference tier + NCAA titles + NCAA tournament consistency + conf titles)
+      let strengthRaw = confRating * 0.65;
+      strengthRaw += Math.min(1.1, ncaaTitles * 0.35);
+      strengthRaw += Math.min(0.85, ncaaApps * 0.025);
+      strengthRaw += Math.min(0.45, confTitles * 0.03);
+      const programStrength = clampHalfStar(strengthRaw);
+
+      // 2. Soccer Facilities (Stadium capacity + natural grass bonus + conference resources)
+      let facRaw = 2.2;
+      if (program.capacity >= 10000) facRaw += 1.4;
+      else if (program.capacity >= 5000) facRaw += 1.25;
+      else if (program.capacity >= 3000) facRaw += 1.0;
+      else if (program.capacity >= 1800) facRaw += 0.75;
+      else if (program.capacity >= 1000) facRaw += 0.45;
+      else facRaw += 0.2;
+      if (program.surface === 'Grass') facRaw += 0.45;
+      facRaw += (confRating - 2.5) * 0.32;
+      const facilities = clampHalfStar(facRaw);
+
+      // 3. Academics (Institutional academic tier + Ivy/Patriot/Elite academic prestige)
+      let acadRaw = 2.8;
+      if (PREMIER_ACADEMIC_IDS.has(program.id) || program.conference === 'Ivy League') {
+        acadRaw = 4.9;
+      } else if (ELITE_ACADEMIC_IDS.has(program.id) || program.conference === 'Patriot League') {
+        acadRaw = 4.3;
+      } else if (['ACC', 'Big Ten', 'Big 12', 'SEC', 'Big East', 'WCC', 'Atlantic 10', 'CAA'].includes(program.conference)) {
+        acadRaw = 3.6;
+      } else if (['AAC', 'Mountain West', 'Pac-12', 'Big West', 'MVC', 'SoCon'].includes(program.conference)) {
+        acadRaw = 3.2;
+      }
+      const academics = clampHalfStar(acadRaw);
+
+      // 4. Location (Soccer hotbed city + destination/climate state + metro access)
+      let locRaw = 2.8;
+      if (DESTINATION_STATES.has(program.state)) locRaw += 0.85;
+      if (SOCCER_HOTBED_CITIES.has(program.city)) locRaw += 0.85;
+      if (['CA', 'FL', 'NC', 'SC', 'TX', 'CO', 'WA', 'OR', 'TN', 'HI'].includes(program.state)) locRaw += 0.35;
+      const location = clampHalfStar(locRaw);
+
+      // 5. Campus & Atmosphere (Campus energy, enrollment balance, matchday stadium atmosphere & school spirit)
+      const undergrads = parseUndergradSize(profile.enrollment);
+      let campRaw = 2.8;
+      if (undergrads >= 18000) campRaw += 0.75;
+      else if (undergrads >= 7000) campRaw += 0.6;
+      else campRaw += 0.45; // tight-knit residential campus appeal
+      if (program.capacity >= 4000) campRaw += 0.55;
+      else if (program.capacity >= 2000) campRaw += 0.3;
+      if (['ACC', 'Big Ten', 'SEC', 'Big 12', 'Big East', 'Ivy League', 'Pac-12', 'Sun Belt'].includes(program.conference)) {
+        campRaw += 0.55;
+      } else if (['WCC', 'AAC', 'Big West', 'Mountain West', 'Atlantic 10', 'Patriot League'].includes(program.conference)) {
+        campRaw += 0.3;
+      }
+      const campus = clampHalfStar(campRaw);
+
+      const overall = Number(((programStrength + facilities + academics + location + campus) / 5).toFixed(1));
+
+      return {
+        academics,
+        facilities,
+        location,
+        programStrength,
+        campus,
+        overall
+      };
     }
 
     // Detailed Branding, Nicknames, Official Colors & Campus Metadata for D1 Programs
@@ -878,21 +1046,18 @@
       const isThird = kitType === 'THIRD';
       const isBack = side === 'BACK';
 
-      // Palette resolution for Home, Away, and Alternate/Third Kit
       let baseColor, accentColor, trimColor;
       if (isHome) {
         baseColor = profile.primary;
         accentColor = profile.secondary.toUpperCase() === '#FFFFFF' ? '#E2E8F0' : profile.secondary;
         trimColor = profile.secondary;
       } else if (isThird) {
-        // Alternate Third Kit: Dark Charcoal/Obsidian or Secondary Showcase
         const secUpper = profile.secondary.toUpperCase();
         const isLightSec = secUpper === '#FFFFFF' || secUpper === '#EEEDEB' || secUpper === '#FDF2D9' || secUpper === '#FDF9D8';
         baseColor = isLightSec ? '#1E293B' : profile.secondary;
         accentColor = profile.primary;
         trimColor = profile.primary;
       } else {
-        // Crisp White Away Kit
         baseColor = '#FFFFFF';
         accentColor = profile.primary;
         trimColor = profile.primary;
@@ -931,14 +1096,12 @@
       const shortCode = escapeXML(program.conference.slice(0, 4).toUpperCase());
       const schoolTag = escapeXML(profile.nickname.slice(0, 14).toUpperCase());
 
-      // Front vs Back details
       const collarMarkup = isBack
         ? `<path d="M68,26 Q100,36 132,26 L126,22 Q100,30 74,22 Z" fill="${trimColor}" />`
         : `<path d="M68,26 Q100,48 132,26 L124,23 Q100,39 76,23 Z" fill="${trimColor}" />`;
 
       const centerGraphics = isBack
         ? `
-          <!-- Player Nameplate on Back -->
           ${displayName ? `
             <text x="100" y="75" text-anchor="middle" font-size="13" font-weight="900" letter-spacing="1.4" font-family="Inter, sans-serif"
                   fill="${numberColor}" stroke="${baseColor}" stroke-width="3" paint-order="stroke">${displayName}</text>
@@ -947,30 +1110,24 @@
                   fill="${numberColor}" opacity="0.65">${schoolTag}</text>
           `}
 
-          <!-- Large Back Kit Number -->
           <text x="100" y="138" text-anchor="middle" font-size="52" font-weight="900" font-family="Inter, sans-serif"
                 fill="${numberColor}" stroke="${baseColor}" stroke-width="4.5" paint-order="stroke">${displayNum}</text>
 
-          <!-- Upper Back Neck Conference Emblem -->
           <rect x="89" y="34" width="22" height="8" rx="2" fill="${trimColor}" />
           <text x="100" y="39.8" text-anchor="middle" font-size="4.8" font-weight="900" fill="${getContrastColor(trimColor)}">${shortCode}</text>
         `
         : `
-          <!-- Left Chest School Crest -->
           <circle cx="123" cy="68" r="9.5" fill="${trimColor}" stroke="#FFFFFF" stroke-width="1.5" />
           <text x="123" y="71" text-anchor="middle" font-size="6.5" font-weight="900" fill="${getContrastColor(trimColor)}">D1</text>
 
-          <!-- Front Kit Number -->
           <text x="100" y="130" text-anchor="middle" font-size="38" font-weight="900" font-family="Inter, sans-serif"
                 fill="${numberColor}" stroke="${baseColor}" stroke-width="4" paint-order="stroke">${displayNum}</text>
 
-          <!-- Optional Recruit Name Banner on Front -->
           ${displayName ? `
             <text x="100" y="156" text-anchor="middle" font-size="9.5" font-weight="900" letter-spacing="1.1" font-family="Inter, sans-serif"
                   fill="${numberColor}" stroke="${baseColor}" stroke-width="2.5" paint-order="stroke">${displayName}</text>
           ` : ''}
 
-          <!-- Bottom Hem Jock Tag -->
           <rect x="60" y="175" width="22" height="7" rx="2" fill="${trimColor}" opacity="0.9" />
           <text x="71" y="180.5" text-anchor="middle" font-size="4.5" font-weight="800" fill="${getContrastColor(trimColor)}">${shortCode}</text>
         `;
@@ -985,22 +1142,16 @@
             </clipPath>
           </defs>
 
-          <!-- Jersey Base Silhouette -->
           <path d="M68,26 L36,42 L14,82 L38,96 L52,72 L52,188 L148,188 L148,72 L162,96 L186,82 L164,42 L132,26 Q100,42 68,26 Z"
                 fill="${baseColor}" stroke="#CBD5E1" stroke-width="2.5" stroke-linejoin="round" />
 
-          <!-- Clipped Kit Pattern -->
           <g clip-path="url(#${clipId})">
             ${patternMarkup}
-            <!-- Sleeve Cuffs -->
             <rect x="10" y="75" width="38" height="10" transform="rotate(28 24 80)" fill="${trimColor}" />
             <rect x="152" y="75" width="38" height="10" transform="rotate(-28 176 80)" fill="${trimColor}" />
           </g>
 
-          <!-- Collar Trim -->
           ${collarMarkup}
-
-          <!-- Front or Back Markings -->
           ${centerGraphics}
         </svg>
       `;
@@ -1457,6 +1608,7 @@
     const SHORTLIST_STORAGE_KEY = 'pitch_map_recruit_shortlist_v1';
     const NOTES_STORAGE_KEY = 'pitch_map_recruit_notes_v1';
     const KIT_PREFS_STORAGE_KEY = 'pitch_map_kit_prefs_v1';
+    const QUIZ_STORAGE_KEY = 'pitch_map_recruit_quiz_v1';
 
     let currentView = 'CONF'; // 'CONF' | 'TABLE'
     let currentGender = 'ALL'; // 'ALL' | 'MEN' | 'WOMEN'
@@ -1468,6 +1620,13 @@
     let shortlistIds = new Set(loadJSONStorage(SHORTLIST_STORAGE_KEY, []));
     let recruitNotes = loadJSONStorage(NOTES_STORAGE_KEY, {});
     let kitPrefs = loadJSONStorage(KIT_PREFS_STORAGE_KEY, { kit: 'HOME', side: 'FRONT', number: '10', name: '' });
+    let quizAnswers = loadJSONStorage(QUIZ_STORAGE_KEY, {
+      gender: 'WOMEN',
+      priority: 'BALANCED', // 'ACADEMICS' | 'PROGRAM' | 'FACILITIES' | 'BALANCED'
+      region: 'ANY',        // 'ANY' | 'WEST' | 'MIDWEST' | 'SOUTH' | 'NORTHEAST'
+      campusSize: 'ANY'     // 'ANY' | 'SMALL' | 'MEDIUM' | 'LARGE'
+    });
+    let quizStep = 0; // 0..3 = questions, 4 = top matches results
     let activeModalProgramId = null;
 
     function loadJSONStorage(key, fallback) {
@@ -1479,29 +1638,29 @@
       }
     }
 
+    function saveQuizAnswers() {
+      try {
+        localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(quizAnswers));
+      } catch (e) {}
+    }
+
     function saveKitPrefs() {
       try {
         localStorage.setItem(KIT_PREFS_STORAGE_KEY, JSON.stringify(kitPrefs));
-      } catch (e) {
-        // Ignore storage errors
-      }
+      } catch (e) {}
     }
 
     function saveShortlist() {
       try {
         localStorage.setItem(SHORTLIST_STORAGE_KEY, JSON.stringify([...shortlistIds]));
-      } catch (e) {
-        // Ignore storage errors in restricted contexts
-      }
+      } catch (e) {}
       updateShortlistUI();
     }
 
     function saveNotes() {
       try {
         localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(recruitNotes));
-      } catch (e) {
-        // Ignore storage errors
-      }
+      } catch (e) {}
     }
 
     function toggleShortlist(programId, event) {
@@ -1515,6 +1674,9 @@
       renderDashboard();
       if (activeModalProgramId === programId) {
         updateModalShortlistButton(programId);
+      }
+      if (!document.getElementById('quiz-modal').classList.contains('hidden') && quizStep === 4) {
+        renderQuizModal();
       }
     }
 
@@ -1535,6 +1697,293 @@
         filterBtn.querySelector('i').classList.add('text-rose-500');
         filterBtn.querySelector('i').classList.remove('text-white');
       }
+    }
+
+    // Recruit Fit Matcher Quiz Logic
+    const REGION_STATES = {
+      WEST: new Set(["CA", "OR", "WA", "AZ", "CO", "UT", "NV", "ID", "MT", "WY", "NM", "HI"]),
+      MIDWEST: new Set(["IL", "IN", "IA", "KS", "MI", "MN", "MO", "NE", "ND", "OH", "SD", "WI"]),
+      SOUTH: new Set(["AL", "AR", "FL", "GA", "KY", "LA", "MS", "NC", "OK", "SC", "TN", "TX", "VA", "WV"]),
+      NORTHEAST: new Set(["CT", "DE", "DC", "ME", "MD", "MA", "NH", "NJ", "NY", "PA", "RI", "VT"])
+    };
+
+    function openQuizModal() {
+      if (currentGender === 'MEN' || currentGender === 'WOMEN') {
+        quizAnswers.gender = currentGender;
+      }
+      quizStep = 0;
+      renderQuizModal();
+      const modal = document.getElementById('quiz-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeQuizModal() {
+      const modal = document.getElementById('quiz-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      if (!activeModalProgramId) {
+        document.body.style.overflow = '';
+      }
+    }
+
+    function selectQuizOption(key, value) {
+      quizAnswers[key] = value;
+      saveQuizAnswers();
+      if (quizStep < 3) {
+        quizStep++;
+      } else {
+        quizStep = 4;
+      }
+      renderQuizModal();
+    }
+
+    function computeQuizMatches() {
+      const g = quizAnswers.gender;
+      const eligible = D1_SOCCER_PROGRAMS.filter(p => {
+        if (g === 'MEN') return p.mens;
+        return p.womens;
+      });
+
+      const scored = eligible.map(p => {
+        const pillars = getSchoolPillars(p, g);
+        const profile = getSchoolProfile(p);
+        const undergrads = parseUndergradSize(profile.enrollment);
+
+        // Weighted pillar score
+        let wAcad = 1, wProg = 1, wFac = 1, wLoc = 1, wCamp = 1;
+        if (quizAnswers.priority === 'ACADEMICS') {
+          wAcad = 2.6; wProg = 1.1;
+        } else if (quizAnswers.priority === 'PROGRAM') {
+          wProg = 2.6; wFac = 1.4;
+        } else if (quizAnswers.priority === 'FACILITIES') {
+          wFac = 2.3; wCamp = 1.8;
+        }
+
+        const totalWeight = wAcad + wProg + wFac + wLoc + wCamp;
+        let baseScore = (
+          pillars.academics * wAcad +
+          pillars.programStrength * wProg +
+          pillars.facilities * wFac +
+          pillars.location * wLoc +
+          pillars.campus * wCamp
+        ) / totalWeight;
+
+        // Region match bonus / penalty
+        if (quizAnswers.region !== 'ANY') {
+          const inRegion = REGION_STATES[quizAnswers.region]?.has(p.state);
+          baseScore += inRegion ? 0.55 : -0.65;
+        }
+
+        // Campus size preference bonus
+        if (quizAnswers.campusSize !== 'ANY') {
+          const sizeCategory = undergrads < 8000 ? 'SMALL' : (undergrads <= 22000 ? 'MEDIUM' : 'LARGE');
+          if (sizeCategory === quizAnswers.campusSize) {
+            baseScore += 0.45;
+          } else {
+            baseScore -= 0.25;
+          }
+        }
+
+        const matchPct = Math.max(64, Math.min(99, Math.round((baseScore / 5.25) * 100)));
+
+        // Build concise fit reason tag
+        const reasons = [];
+        if (pillars.academics >= 4.5) reasons.push(`★${pillars.academics.toFixed(1)} Academics`);
+        if (pillars.programStrength >= 4.5) reasons.push(`★${pillars.programStrength.toFixed(1)} Soccer Power`);
+        if (pillars.facilities >= 4.5) reasons.push(`★${pillars.facilities.toFixed(1)} Facilities`);
+        if (quizAnswers.region !== 'ANY' && REGION_STATES[quizAnswers.region]?.has(p.state)) {
+          reasons.push(`${p.state} Location Match`);
+        }
+        if (reasons.length === 0) reasons.push(`${p.conference} • ★${pillars.overall.toFixed(1)} Overall`);
+
+        return {
+          program: p,
+          profile,
+          pillars,
+          matchPct,
+          sortScore: baseScore,
+          reasonText: reasons.slice(0, 2).join(' • ')
+        };
+      });
+
+      return scored.sort((a, b) => b.sortScore - a.sortScore).slice(0, 8);
+    }
+
+    function applyQuizFiltersToDashboard() {
+      const targetBtn = quizAnswers.gender === 'MEN'
+        ? document.getElementById('btn-gender-men')
+        : document.getElementById('btn-gender-women');
+      setGenderFilter(quizAnswers.gender, targetBtn);
+      setViewMode('TABLE');
+      setTableSort('PILLAR_OVERALL');
+      closeQuizModal();
+    }
+
+    function renderQuizModal() {
+      const body = document.getElementById('quiz-body');
+
+      const questions = [
+        {
+          key: 'gender',
+          stepLabel: 'Step 1 of 4',
+          title: 'Which NCAA Division I soccer division are you targeting?',
+          options: [
+            { val: 'WOMEN', icon: 'fa-venus', label: "Women's Division I Soccer", desc: '240 active NCAA D1 women’s programs across 25 conferences' },
+            { val: 'MEN', icon: 'fa-mars', label: "Men's Division I Soccer", desc: '154 active NCAA D1 men’s programs across 22 conferences' }
+          ]
+        },
+        {
+          key: 'priority',
+          stepLabel: 'Step 2 of 4',
+          title: 'What is your #1 recruiting priority?',
+          options: [
+            { val: 'BALANCED', icon: 'fa-scale-balanced', label: 'Balanced All-Around Fit', desc: 'Equal weight across Academics, Program Strength, Facilities, Location & Campus' },
+            { val: 'ACADEMICS', icon: 'fa-graduation-cap', label: 'Elite Academic Prestige', desc: 'Prioritize Ivy League, Patriot League & top-ranked academic institutions' },
+            { val: 'PROGRAM', icon: 'fa-trophy', label: 'Championship Soccer Powerhouse', desc: 'Prioritize NCAA titles, postseason appearances & Power-4 competition' },
+            { val: 'FACILITIES', icon: 'fa-stadium', label: 'Pro-Grade Facilities & Campus Energy', desc: 'Prioritize premier grass stadiums, big crowds & vibrant campus life' }
+          ]
+        },
+        {
+          key: 'region',
+          stepLabel: 'Step 3 of 4',
+          title: 'Which U.S. region do you prefer?',
+          options: [
+            { val: 'ANY', icon: 'fa-earth-americas', label: 'Anywhere in the U.S.', desc: 'Show the strongest fits nationwide regardless of coast' },
+            { val: 'SOUTH', icon: 'fa-sun', label: 'South & Southeast', desc: 'ACC/SEC/Sun Belt footprint (NC, VA, FL, SC, TX, GA, TN...)' },
+            { val: 'NORTHEAST', icon: 'fa-building-columns', label: 'Northeast & Mid-Atlantic', desc: 'Ivy, Big East & Patriot footprint (NY, MA, PA, NJ, CT, MD...)' },
+            { val: 'MIDWEST', icon: 'fa-wheat-awn', label: 'Midwest', desc: 'Big Ten & MVC footprint (IN, OH, IL, MI, WI, MO, NE...)' },
+            { val: 'WEST', icon: 'fa-mountain-sun', label: 'West & Pacific', desc: 'Pac-12, WCC & Big West footprint (CA, WA, OR, CO, UT, AZ...)' }
+          ]
+        },
+        {
+          key: 'campusSize',
+          stepLabel: 'Step 4 of 4',
+          title: 'What campus size fits you best?',
+          options: [
+            { val: 'ANY', icon: 'fa-layer-group', label: 'Open to Any Campus Size', desc: 'Compare small private colleges and large flagship universities' },
+            { val: 'SMALL', icon: 'fa-house-chimney', label: 'Small & Tight-Knit (< 8,000 undergrads)', desc: 'Intimate class sizes and close-knit residential campuses' },
+            { val: 'MEDIUM', icon: 'fa-school', label: 'Mid-Size (8,000 – 22,000 undergrads)', desc: 'Balanced division I atmosphere with accessible campus scale' },
+            { val: 'LARGE', icon: 'fa-city', label: 'Large Flagship (22,000+ undergrads)', desc: 'Major research universities with massive student sections' }
+          ]
+        }
+      ];
+
+      if (quizStep < 4) {
+        const q = questions[quizStep];
+        const progressPct = ((quizStep + 1) / 4) * 100;
+
+        body.innerHTML = `
+          <div class="space-y-4">
+            <div class="flex items-center justify-between text-xs font-extrabold text-brand-700">
+              <span>${q.stepLabel}</span>
+              <span>${Math.round(progressPct)}% Complete</span>
+            </div>
+            <div class="w-full h-2 bg-brand-100 rounded-full overflow-hidden">
+              <div class="h-full bg-brand-600 rounded-full transition-all duration-300" style="width:${progressPct}%"></div>
+            </div>
+
+            <h3 class="text-lg font-black text-slate-900 pt-1">${q.title}</h3>
+
+            <div class="grid grid-cols-1 gap-2.5">
+              ${q.options.map(opt => {
+                const selected = quizAnswers[q.key] === opt.val;
+                return `
+                  <button
+                    type="button"
+                    onclick="selectQuizOption('${q.key}', '${opt.val}')"
+                    class="w-full text-left p-4 rounded-2xl border transition flex items-center gap-3.5 cursor-pointer ${selected ? 'bg-brand-50 border-brand-500 ring-2 ring-brand-500/20' : 'bg-white hover:bg-brand-50/50 border-slate-200 hover:border-brand-300'}"
+                  >
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${selected ? 'bg-brand-600 text-white' : 'bg-brand-100 text-brand-700'}">
+                      <i class="fa-solid ${opt.icon} text-base"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="font-extrabold text-slate-900 text-sm">${opt.label}</div>
+                      <div class="text-xs text-slate-500 mt-0.5">${opt.desc}</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+              ${quizStep > 0
+                ? `<button type="button" onclick="quizStep--; renderQuizModal();" class="text-xs font-bold text-slate-500 hover:text-brand-700 px-3 py-1.5 rounded-lg"><i class="fa-solid fa-arrow-left mr-1"></i> Back</button>`
+                : `<span></span>`
+              }
+              <button type="button" onclick="quizStep = 4; renderQuizModal();" class="text-xs font-bold text-brand-600 hover:text-brand-800 px-3 py-1.5 rounded-lg">
+                Skip to Results <i class="fa-solid fa-forward ml-1"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // Results View (quizStep === 4)
+      const matches = computeQuizMatches();
+      body.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-brand-50 border border-brand-100 rounded-2xl p-4">
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-wider text-brand-600">Personalized Target List</span>
+              <h3 class="text-base font-black text-slate-900">Top 8 ${quizAnswers.gender === 'MEN' ? "Men's" : "Women's"} D1 Matches</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="quizStep = 0; renderQuizModal();" class="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Retake
+              </button>
+              <button type="button" onclick="applyQuizFiltersToDashboard()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-bold shadow-2xs transition">
+                View Full Leaderboard
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-2.5">
+            ${matches.map((m, idx) => {
+              const p = m.program;
+              const isSaved = shortlistIds.has(p.id);
+              return `
+                <div 
+                  onclick="closeQuizModal(); openProgramModal('${p.id}');"
+                  class="p-3.5 rounded-2xl border ${isSaved ? 'bg-rose-50/40 border-rose-200' : 'bg-white hover:bg-brand-50/60 border-slate-200 hover:border-brand-300'} transition flex items-center justify-between gap-3 cursor-pointer"
+                >
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center shrink-0 ${idx === 0 ? 'bg-amber-400 text-slate-950' : 'bg-brand-100 text-brand-800'}">
+                      #${idx + 1}
+                    </div>
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="font-extrabold text-slate-900 text-sm truncate">${p.name}</span>
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-md">${m.matchPct}% Fit</span>
+                      </div>
+                      <div class="text-[11px] text-slate-500 mt-0.5 truncate">
+                        <span class="font-semibold text-brand-700">${p.conference}</span> • ${p.city}, ${p.state} • ${m.reasonText}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span class="hidden sm:inline-flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-200 px-2 py-1 rounded-lg text-[11px] font-extrabold">
+                      <i class="fa-solid fa-star text-amber-400"></i> ${m.pillars.overall.toFixed(1)}
+                    </span>
+                    <button
+                      type="button"
+                      onclick="toggleShortlist('${p.id}', event)"
+                      title="${isSaved ? 'Saved in Shortlist' : 'Add to Shortlist'}"
+                      class="w-8 h-8 rounded-xl border flex items-center justify-center transition ${isSaved ? 'bg-rose-500 text-white border-rose-500' : 'bg-white text-slate-400 hover:text-rose-500 border-slate-200'}"
+                    >
+                      <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-heart text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
     }
 
     // Switch between Conference View and Rank Table View
@@ -1587,12 +2036,14 @@
     function getProgramMetrics(program) {
       const m = (currentGender !== 'WOMEN' && program.mens && program.mensStats) ? program.mensStats : null;
       const w = (currentGender !== 'MEN' && program.womens && program.womensStats) ? program.womensStats : null;
+      const pillars = getSchoolPillars(program);
 
       return {
         ncaaTitles: (m ? m.ncaaTitles : 0) + (w ? w.ncaaTitles : 0),
         ncaaApps: (m ? m.ncaaApps : 0) + (w ? w.ncaaApps : 0),
         confTitles: (m ? m.confTitles : 0) + (w ? w.confTitles : 0),
         confRating: getConferenceRating(program.conference),
+        pillarOverall: pillars.overall,
         capacity: program.capacity || 0
       };
     }
@@ -1703,6 +2154,54 @@
       `;
     }
 
+    // Render 5-Pillar Scorecard inside Program Modal
+    function renderModalPillarsCard(program) {
+      const pillars = getSchoolPillars(program);
+      const rows = [
+        { label: "Academics", score: pillars.academics, icon: "fa-graduation-cap", color: "bg-indigo-500" },
+        { label: "Program Strength", score: pillars.programStrength, icon: "fa-trophy", color: "bg-amber-500" },
+        { label: "Soccer Facilities", score: pillars.facilities, icon: "fa-stadium", color: "bg-sky-500" },
+        { label: "Location & Hotbed", score: pillars.location, icon: "fa-location-dot", color: "bg-emerald-500" },
+        { label: "Campus & Atmosphere", score: pillars.campus, icon: "fa-building-columns", color: "bg-purple-500" }
+      ];
+
+      document.getElementById('modal-pillars-card').innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-brand-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-simple text-brand-600"></i> 5-Pillar Program Scorecard
+            </h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">Individual recruit evaluation across key decision factors</p>
+          </div>
+          <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <span class="text-sm font-black text-amber-950">${pillars.overall.toFixed(1)}</span>
+            <span class="text-[10px] font-bold text-amber-800">/ 5.0 Overall</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 pt-1">
+          ${rows.map(r => {
+            const pct = (r.score / 5) * 100;
+            return `
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                    <i class="fa-solid ${r.icon} text-slate-400 w-3.5 text-center"></i>
+                    <span>${r.label}</span>
+                  </span>
+                  <span class="font-black text-slate-900">★ ${r.score.toFixed(1)}</span>
+                </div>
+                <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full ${r.color} rounded-full" style="width:${pct}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
     // Open School Detail & Jersey Replica Modal
     function openProgramModal(programId) {
       const program = D1_SOCCER_PROGRAMS.find(p => p.id === programId);
@@ -1724,6 +2223,8 @@
         <span><i class="fa-solid fa-location-dot mr-1"></i>${program.city}, ${program.state}</span>
       `;
 
+      renderModalPillarsCard(program);
+
       document.getElementById('modal-color-swatches').innerHTML = `
         <span class="inline-flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-brand-100">
           <span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" style="background-color: ${profile.primary}"></span>
@@ -1738,7 +2239,6 @@
       document.getElementById('modal-stadium').textContent = program.stadium;
       document.getElementById('modal-stadium-meta').textContent = `${program.capacity.toLocaleString()} seats • ${program.surface}`;
 
-      // Show gender-specific conference ratings in modal
       const confEntry = CONFERENCE_RATINGS[program.conference];
       const activeRating = getConferenceRating(program.conference);
       document.getElementById('modal-conf-rating').innerHTML = renderStarRating(activeRating);
@@ -1869,6 +2369,13 @@
       document.getElementById('btn-view-conf').addEventListener('click', () => setViewMode('CONF'));
       document.getElementById('btn-view-table').addEventListener('click', () => setViewMode('TABLE'));
 
+      // Recruit Fit Quiz Triggers
+      document.getElementById('btn-open-quiz').addEventListener('click', openQuizModal);
+      document.getElementById('quiz-close-btn').addEventListener('click', closeQuizModal);
+      document.getElementById('quiz-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'quiz-modal') closeQuizModal();
+      });
+
       // Setup Event Listeners
       searchInput.addEventListener('input', (e) => {
         currentSearch = e.target.value.toLowerCase().trim();
@@ -1913,7 +2420,10 @@
         if (e.target.id === 'program-modal') closeProgramModal();
       });
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && activeModalProgramId) closeProgramModal();
+        if (e.key === 'Escape') {
+          if (activeModalProgramId) closeProgramModal();
+          if (!document.getElementById('quiz-modal').classList.contains('hidden')) closeQuizModal();
+        }
       });
 
       // Kit Customizer Listeners
@@ -2097,12 +2607,12 @@
       const genderLabel = currentGender === 'MEN'
         ? "Men's soccer stats & Men's conference ratings"
         : (currentGender === 'WOMEN' ? "Women's soccer stats & Women's conference ratings" : "Combined Men's & Women's stats");
-      subtitleEl.textContent = `Showing ${genderLabel} • Click any column header to re-rank or click any row to customize Home, Away & Third jersey replicas`;
+      subtitleEl.textContent = `Showing ${genderLabel} • Click any column header to re-rank or click any row to inspect 5-pillar ratings & customize jerseys`;
 
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="9" class="py-12 px-6 text-center text-slate-400">
+            <td colspan="10" class="py-12 px-6 text-center text-slate-400">
               <i class="fa-solid fa-futbol text-3xl mb-2 text-brand-200 block"></i>
               <span class="font-bold text-slate-700 block">No matching programs in table</span>
               <span class="text-xs">Try adjusting your filters or search query.</span>
@@ -2116,6 +2626,11 @@
         const mA = getProgramMetrics(a);
         const mB = getProgramMetrics(b);
 
+        if (currentTableSort === 'PILLAR_OVERALL') {
+          if (mB.pillarOverall !== mA.pillarOverall) return mB.pillarOverall - mA.pillarOverall;
+          if (mB.ncaaApps !== mA.ncaaApps) return mB.ncaaApps - mA.ncaaApps;
+          return a.name.localeCompare(b.name);
+        }
         if (currentTableSort === 'NCAA_TITLES') {
           if (mB.ncaaTitles !== mA.ncaaTitles) return mB.ncaaTitles - mA.ncaaTitles;
           if (mB.ncaaApps !== mA.ncaaApps) return mB.ncaaApps - mA.ncaaApps;
@@ -2175,6 +2690,12 @@
               <span class="inline-flex items-center gap-1 bg-brand-50 text-brand-800 font-bold px-2 py-0.5 rounded-lg border border-brand-100">
                 <span>${p.conference}</span>
                 <span class="text-amber-500 text-[10px]">★ ${m.confRating.toFixed(1)}</span>
+              </span>
+            </td>
+            <td class="py-3 px-3 text-center whitespace-nowrap">
+              <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-900 font-black px-2 py-0.5 rounded-md border border-amber-200/80">
+                <i class="fa-solid fa-star text-amber-400 text-[10px]"></i>
+                <span>${m.pillarOverall.toFixed(1)}</span>
               </span>
             </td>
             <td class="py-3 px-3 whitespace-nowrap">
@@ -2277,6 +2798,7 @@
             ${teams.map(p => {
               const isSaved = shortlistIds.has(p.id);
               const profile = getSchoolProfile(p);
+              const pillars = getSchoolPillars(p);
               const hasNote = Boolean(recruitNotes[p.id]);
               return `
               <div 
@@ -2290,11 +2812,14 @@
                   <div class="flex items-start justify-between gap-2 mb-1.5">
                     <div>
                       <h3 class="font-bold text-slate-900 group-hover:text-brand-700 text-base leading-snug transition-colors">${p.name}</h3>
-                      <div class="flex items-center gap-1.5 mt-0.5">
+                      <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
                         <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500">
                           <span class="w-2.5 h-2.5 rounded-full border border-slate-300 inline-block" style="background-color:${profile.primary}"></span>
                           <span class="w-2.5 h-2.5 rounded-full border border-slate-300 inline-block" style="background-color:${profile.secondary}"></span>
                           <span>${profile.nickname}</span>
+                        </span>
+                        <span class="bg-amber-50 text-amber-900 border border-amber-200/80 text-[10px] font-extrabold px-1.5 py-0.5 rounded inline-flex items-center gap-0.5" title="5-Pillar School Rating (Academics, Facilities, Location, Soccer Power & Campus)">
+                          <i class="fa-solid fa-star text-amber-400 text-[9px]"></i> ${pillars.overall.toFixed(1)}
                         </span>
                         ${hasNote ? `<span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded" title="You saved a private note for this school"><i class="fa-solid fa-note-sticky"></i> Note</span>` : ''}
                       </div>
@@ -2360,7 +2885,7 @@
                     ${p.womens ? '<span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[10px]">Women\'s</span>' : ''}
                   </div>
                   <div class="text-[11px] text-brand-700 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                    <span>Customize Kits &amp; Info</span>
+                    <span>Ratings &amp; Kits</span>
                     <i class="fa-solid fa-chevron-right text-[9px]"></i>
                   </div>
                 </div>
