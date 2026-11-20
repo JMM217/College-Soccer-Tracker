@@ -88,24 +88,44 @@
 
   <!-- Filter & Control Toolbar -->
   <section class="bg-white border-b border-brand-100 shadow-sm sticky top-[73px] z-20 px-6 py-4">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-4 items-center justify-between">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-3 items-center justify-between">
       
       <!-- Search Input -->
-      <div class="relative w-full md:w-80">
+      <div class="relative w-full lg:w-80">
         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
         <input 
           type="text" 
           id="search-input" 
-          placeholder="Search school, city, or stadium..." 
+          placeholder="Search school, city, conference, or stadium..." 
           class="w-full pl-10 pr-4 py-2 bg-brand-50 border border-brand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-700 placeholder-slate-400"
         >
       </div>
 
       <!-- Controls Group -->
-      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+      <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
         
+        <!-- Recruit Shortlist Filter & Copy -->
+        <div class="flex items-center gap-1.5">
+          <button 
+            id="btn-shortlist-filter" 
+            class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+            title="Show only your saved favorite schools"
+          >
+            <i class="fa-solid fa-heart text-rose-500"></i>
+            <span>My Shortlist (<span id="shortlist-count">0</span>)</span>
+          </button>
+          <button 
+            id="btn-copy-shortlist" 
+            class="px-2.5 py-1.5 bg-white hover:bg-brand-50 text-brand-700 border border-brand-200 rounded-xl text-xs font-semibold transition hidden items-center gap-1"
+            title="Copy your shortlist to clipboard to share with coaches or parents"
+          >
+            <i class="fa-regular fa-copy"></i>
+            <span id="copy-shortlist-label">Copy List</span>
+          </button>
+        </div>
+
         <!-- Sort Dropdown -->
-        <div class="relative">
+        <div class="relative" id="sort-wrapper">
           <select 
             id="sort-filter" 
             aria-label="Sort conferences"
@@ -131,9 +151,9 @@
 
         <!-- Gender Segmented Buttons -->
         <div class="flex bg-brand-100 p-1 rounded-xl text-xs font-semibold">
-          <button id="btn-gender-all" class="gender-btn active px-3 py-1.5 rounded-lg bg-white text-brand-800 shadow-sm">All</button>
-          <button id="btn-gender-men" class="gender-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-brand-800">Men's</button>
-          <button id="btn-gender-women" class="gender-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-brand-800">Women's</button>
+          <button id="btn-gender-all" class="gender-btn active px-3 py-1 rounded-lg bg-white text-brand-800 shadow-sm">All</button>
+          <button id="btn-gender-men" class="gender-btn px-3 py-1 rounded-lg text-slate-600 hover:text-brand-800">Men's</button>
+          <button id="btn-gender-women" class="gender-btn px-3 py-1 rounded-lg text-slate-600 hover:text-brand-800">Women's</button>
         </div>
 
         <!-- Reset Button -->
@@ -144,7 +164,7 @@
     </div>
   </section>
 
-  <!-- Main Content Area: Conference Grid View -->
+  <!-- Main Content Area -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-8 space-y-10">
     
     <!-- Quick Conference Navigation Chips -->
@@ -645,10 +665,92 @@
     ];
 
     // State Variables
+    const SHORTLIST_STORAGE_KEY = 'pitch_map_recruit_shortlist_v1';
     let currentGender = 'ALL';
     let currentState = 'ALL';
     let currentSearch = '';
     let currentSort = 'RATING';
+    let onlyShortlist = false;
+    let shortlistIds = new Set(loadShortlist());
+
+    function loadShortlist() {
+      try {
+        const saved = localStorage.getItem(SHORTLIST_STORAGE_KEY);
+        return saved ? JSON.parse(saved) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveShortlist() {
+      try {
+        localStorage.setItem(SHORTLIST_STORAGE_KEY, JSON.stringify([...shortlistIds]));
+      } catch (e) {
+        // Ignore storage errors in restricted contexts
+      }
+      updateShortlistUI();
+    }
+
+    function toggleShortlist(programId) {
+      if (shortlistIds.has(programId)) {
+        shortlistIds.delete(programId);
+      } else {
+        shortlistIds.add(programId);
+      }
+      saveShortlist();
+      renderDashboard();
+    }
+
+    function updateShortlistUI() {
+      const countEl = document.getElementById('shortlist-count');
+      const filterBtn = document.getElementById('btn-shortlist-filter');
+      const copyBtn = document.getElementById('btn-copy-shortlist');
+
+      countEl.textContent = shortlistIds.size;
+
+      if (onlyShortlist) {
+        filterBtn.classList.remove('bg-rose-50', 'text-rose-700', 'border-rose-200');
+        filterBtn.classList.add('bg-rose-600', 'text-white', 'border-rose-600', 'shadow-sm');
+        filterBtn.querySelector('i').classList.remove('text-rose-500');
+        filterBtn.querySelector('i').classList.add('text-white');
+      } else {
+        filterBtn.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200');
+        filterBtn.classList.remove('bg-rose-600', 'text-white', 'border-rose-600', 'shadow-sm');
+        filterBtn.querySelector('i').classList.add('text-rose-500');
+        filterBtn.querySelector('i').classList.remove('text-white');
+      }
+
+      if (shortlistIds.size > 0) {
+        copyBtn.classList.remove('hidden');
+        copyBtn.classList.add('inline-flex');
+      } else {
+        copyBtn.classList.add('hidden');
+        copyBtn.classList.remove('inline-flex');
+      }
+    }
+
+    function copyShortlistToClipboard() {
+      const savedPrograms = D1_SOCCER_PROGRAMS.filter(p => shortlistIds.has(p.id));
+      if (savedPrograms.length === 0) return;
+
+      const lines = [
+        "My Pitch Map NCAA D1 Soccer Recruit Shortlist:",
+        ...savedPrograms.map((p, idx) => {
+          const teams = [p.mens ? "Men's" : null, p.womens ? "Women's" : null].filter(Boolean).join(" & ");
+          return `${idx + 1}. ${p.name} (${p.conference}) — ${p.city}, ${p.state} [${teams}]`;
+        })
+      ];
+
+      const text = lines.join('\n');
+      const labelEl = document.getElementById('copy-shortlist-label');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          labelEl.textContent = 'Copied!';
+          setTimeout(() => { labelEl.textContent = 'Copy List'; }, 2000);
+        });
+      }
+    }
 
     // DOM Elements
     const searchInput = document.getElementById('search-input');
@@ -665,6 +767,7 @@
     // Initialize App
     window.onload = function() {
       updateMetrics();
+      updateShortlistUI();
       populateStateDropdown();
       renderConferenceChips();
       renderDashboard();
@@ -674,6 +777,14 @@
         currentSearch = e.target.value.toLowerCase().trim();
         renderDashboard();
       });
+
+      document.getElementById('btn-shortlist-filter').addEventListener('click', () => {
+        onlyShortlist = !onlyShortlist;
+        updateShortlistUI();
+        renderDashboard();
+      });
+
+      document.getElementById('btn-copy-shortlist').addEventListener('click', copyShortlistToClipboard);
 
       sortFilter.addEventListener('change', (e) => {
         currentSort = e.target.value;
@@ -736,9 +847,11 @@
       currentGender = 'ALL';
       currentState = 'ALL';
       currentSort = 'RATING';
+      onlyShortlist = false;
       searchInput.value = '';
       stateFilter.value = 'ALL';
       sortFilter.value = 'RATING';
+      updateShortlistUI();
       renderConferenceChips();
       setGenderFilter('ALL', document.getElementById('btn-gender-all'));
     }
@@ -782,6 +895,7 @@
     function getFilteredPrograms() {
       return D1_SOCCER_PROGRAMS.filter(program => {
         if (!program.mens && !program.womens) return false;
+        if (onlyShortlist && !shortlistIds.has(program.id)) return false;
         if (currentGender === 'MEN' && !program.mens) return false;
         if (currentGender === 'WOMEN' && !program.womens) return false;
         if (currentState !== 'ALL' && program.state !== currentState) return false;
@@ -805,13 +919,21 @@
       conferenceSectionsEl.innerHTML = '';
 
       if (filtered.length === 0) {
-        conferenceSectionsEl.innerHTML = `
-          <div class="bg-white rounded-2xl p-12 text-center text-slate-400 border border-brand-100 shadow-sm">
-            <i class="fa-solid fa-futbol text-4xl mb-3 text-brand-200"></i>
-            <h3 class="text-lg font-bold text-slate-700 mb-1">No Programs Found</h3>
-            <p class="text-xs">Try adjusting your search query, state, or gender filter.</p>
-          </div>
-        `;
+        conferenceSectionsEl.innerHTML = onlyShortlist
+          ? `
+            <div class="bg-white rounded-2xl p-12 text-center text-slate-400 border border-brand-100 shadow-sm">
+              <i class="fa-regular fa-heart text-4xl mb-3 text-rose-300"></i>
+              <h3 class="text-lg font-bold text-slate-700 mb-1">Your Recruit Shortlist is Empty</h3>
+              <p class="text-xs max-w-md mx-auto">Click the heart icon on any school card to save programs you are interested in. Your list stays saved automatically in this browser.</p>
+            </div>
+          `
+          : `
+            <div class="bg-white rounded-2xl p-12 text-center text-slate-400 border border-brand-100 shadow-sm">
+              <i class="fa-solid fa-futbol text-4xl mb-3 text-brand-200"></i>
+              <h3 class="text-lg font-bold text-slate-700 mb-1">No Programs Found</h3>
+              <p class="text-xs">Try adjusting your search query, state, or gender filter.</p>
+            </div>
+          `;
         return;
       }
 
@@ -849,11 +971,22 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            ${teams.map(p => `
-              <div class="bg-brand-50/60 hover:bg-brand-50 border border-brand-100 hover:border-brand-300 rounded-xl p-4 transition-all hover:shadow-md flex flex-col justify-between space-y-3">
+            ${teams.map(p => {
+              const isSaved = shortlistIds.has(p.id);
+              return `
+              <div class="${isSaved ? 'bg-rose-50/40 border-rose-200' : 'bg-brand-50/60 border-brand-100'} hover:bg-brand-50 border hover:border-brand-300 rounded-xl p-4 transition-all hover:shadow-md flex flex-col justify-between space-y-3">
                 <div>
-                  <div class="flex items-center justify-between gap-2 mb-1.5">
+                  <div class="flex items-start justify-between gap-2 mb-1.5">
                     <h3 class="font-bold text-slate-900 text-base leading-snug">${p.name}</h3>
+                    <button 
+                      type="button"
+                      onclick="toggleShortlist('${p.id}')"
+                      aria-label="${isSaved ? 'Remove from shortlist' : 'Add to shortlist'}"
+                      title="${isSaved ? 'Saved to Recruit Shortlist (click to remove)' : 'Save to Recruit Shortlist'}"
+                      class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center border transition ${isSaved ? 'bg-rose-500 text-white border-rose-500 shadow-sm' : 'bg-white text-slate-400 hover:text-rose-500 border-brand-100 hover:border-rose-200'}"
+                    >
+                      <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-heart text-xs"></i>
+                    </button>
                   </div>
                   <div class="text-xs text-slate-500 space-y-1">
                     <p class="flex items-center gap-1.5">
@@ -910,7 +1043,8 @@
                   </div>
                 </div>
               </div>
-            `).join('')}
+            `;
+            }).join('')}
           </div>
         `;
 
